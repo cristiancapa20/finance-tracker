@@ -13,6 +13,7 @@ import {
   Music,
   PiggyBank,
   Tag,
+  Laptop,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -22,7 +23,8 @@ const categoryIconMap: { keywords: string[]; Icon: LucideIcon }[] = [
   { keywords: ["transport", "auto", "carro", "gasolina", "uber", "taxi", "bus"], Icon: Car },
   { keywords: ["salud", "médic", "medic", "farmac", "doctor", "hospital"], Icon: Heart },
   { keywords: ["ropa", "vestim", "moda", "tienda", "shopping", "compra"], Icon: ShoppingBag },
-  { keywords: ["hogar", "casa", "renta", "rent", "mueble", "limpiez"], Icon: Home },
+  { keywords: ["tecnolog", "laptop", "celular", "telefono", "teléfono", "comput", "electro", "gadget", "movil", "móvil"], Icon: Laptop },
+  { keywords: ["vivienda", "hogar", "casa", "renta", "rent", "mueble", "limpiez", "departamento", "depa"], Icon: Home },
   { keywords: ["trabajo", "sueldo", "salario", "nómina", "nomina", "ingreso", "ingres"], Icon: Briefcase },
   { keywords: ["viaje", "vuelo", "hotel", "vacacion"], Icon: Plane },
   { keywords: ["deporte", "gym", "gimnasio", "ejercicio"], Icon: Dumbbell },
