@@ -540,7 +540,6 @@ export default function TransactionForm() {
               onClick={() => {
                 setForm(null);
                 setNullFields(new Set());
-                setSaveError("");
               }}
               className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
