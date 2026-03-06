@@ -11,7 +11,7 @@ import { toast } from "@/lib/toast";
 
 interface Profile {
   id: string;
-  username: string;
+  email: string;
   displayName: string | null;
   avatar: string | null;
   createdAt: string;
@@ -63,7 +63,7 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        await update({ user: { ...session?.user, name: displayName || profile?.username } });
+        await update({ user: { ...session?.user, name: displayName || profile?.email } });
         router.refresh();
         toast.success({ title: "Perfil actualizado" });
       } else {
@@ -74,7 +74,7 @@ export default function ProfilePage() {
     }
   }
 
-  const initials = (displayName || profile?.username || "?")
+  const initials = (displayName || profile?.email || "?")
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -126,16 +126,16 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Username (read only) */}
+        {/* Email (read only) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Usuario
+            Correo electrónico
           </label>
           <div className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-500">
             <User className="w-4 h-4" />
-            {profile?.username}
+            {profile?.email}
           </div>
-          <p className="text-xs text-gray-400 mt-1">El nombre de usuario no se puede cambiar</p>
+          <p className="text-xs text-gray-400 mt-1">El correo no se puede cambiar</p>
         </div>
 
         {/* Display name */}
@@ -149,7 +149,7 @@ export default function ProfilePage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-            placeholder={profile?.username ?? "Tu nombre"}
+            placeholder={profile?.email ?? "Tu nombre"}
           />
           <p className="text-xs text-gray-400 mt-1">Este nombre aparecerá en el menú</p>
         </div>
