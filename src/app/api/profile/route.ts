@@ -13,6 +13,8 @@ export async function GET() {
       select: { id: true, username: true, displayName: true, avatar: true, createdAt: true },
     });
 
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
     return NextResponse.json({ data: user });
   } catch (error) {
     console.error("GET /api/profile error:", error);
@@ -24,6 +26,10 @@ export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Verify the user exists before attempting update
+    const existing = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!existing) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
     const { displayName, avatar } = body;

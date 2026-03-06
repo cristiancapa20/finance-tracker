@@ -12,16 +12,16 @@ function UserAvatar({ name }: { name?: string | null }) {
 
   useEffect(() => {
     fetch("/api/profile")
-      .then((r) => r.json())
-      .then((d) => { if (d.data?.avatar) setAvatar(d.data.avatar); });
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.data?.avatar) setAvatar(d.data.avatar); });
   }, []);
 
   const initial = (name ?? "?")[0].toUpperCase();
 
   return (
-    <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-100 flex items-center justify-center flex-shrink-0">
+    <div className="relative w-8 h-8 rounded-full overflow-hidden bg-indigo-100 flex items-center justify-center flex-shrink-0">
       {avatar
-        ? <Image src={avatar} alt="Avatar" fill className="object-cover" unoptimized />
+        ? <Image src={avatar} alt="Avatar" fill className="object-cover rounded-full" unoptimized />
         : <span className="text-xs font-bold text-indigo-600">{initial}</span>
       }
     </div>
