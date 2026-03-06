@@ -134,12 +134,14 @@ export default function QuickTransactionButton() {
     rec.interimResults = true;
     let final = "";
     rec.onresult = (e: SpeechRecognitionEvent) => {
+      let finalText = "";
       let interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
         else interim += e.results[i][0].transcript;
       }
-      setText(final + interim);
+      final = finalText;
+      setText(finalText + interim);
     };
     rec.onend = () => {
       setMicState("idle");
@@ -289,10 +291,14 @@ export default function QuickTransactionButton() {
                 <div className="flex gap-2 items-start">
                   <textarea
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={(e) => {
+                      setText(e.target.value);
+                      e.target.style.height = "auto";
+                      e.target.style.height = e.target.scrollHeight + "px";
+                    }}
                     placeholder="Ej: 'Pagué 45.50 en el supermercado hoy con tarjeta'"
                     rows={3}
-                    className={`${inputBase} border-gray-300 bg-white focus:border-indigo-500 focus:ring-indigo-200 resize-none flex-1`}
+                    className={`${inputBase} border-gray-300 bg-white focus:border-indigo-500 focus:ring-indigo-200 resize-none flex-1 min-h-[80px] overflow-hidden`}
                     disabled={isParsing || micState === "recording"}
                     autoFocus
                   />

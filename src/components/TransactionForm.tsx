@@ -114,15 +114,17 @@ export default function TransactionForm() {
     let finalTranscript = "";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let final = "";
       let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      for (let i = 0; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          final += event.results[i][0].transcript;
         } else {
           interim += event.results[i][0].transcript;
         }
       }
-      setText(finalTranscript + interim);
+      finalTranscript = final;
+      setText(final + interim);
     };
 
     recognition.onend = () => {
@@ -270,10 +272,14 @@ export default function TransactionForm() {
           <div className="flex gap-2 items-start">
             <textarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
               placeholder="Describe tu transacción, ej: 'Pagué 45.50 en el supermercado hoy con tarjeta'"
               rows={3}
-              className={`${inputBase} border-gray-300 bg-white focus:border-indigo-500 focus:ring-indigo-200 resize-none flex-1`}
+              className={`${inputBase} border-gray-300 bg-white focus:border-indigo-500 focus:ring-indigo-200 resize-none flex-1 min-h-[80px] overflow-hidden`}
               disabled={isParsing || micState === "recording"}
             />
             <div className="flex flex-col items-center gap-1 pt-1">
