@@ -65,13 +65,13 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
+      <header className="bg-gray-900 border-b border-white/10 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
 
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold text-indigo-600">
-              <TrendingUp className="w-5 h-5" />
+            <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold text-white">
+              <TrendingUp className="w-5 h-5 text-indigo-400" />
               Finance Tracker
             </Link>
 
@@ -82,7 +82,7 @@ export default function Header() {
                   key={href}
                   href={href}
                   className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                    pathname === href ? "text-indigo-600" : "text-gray-600 hover:text-indigo-600"
+                    pathname === href ? "text-indigo-400" : "text-gray-300 hover:text-white"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -97,10 +97,10 @@ export default function Header() {
                 <div className="relative" ref={profileRef}>
                   <button
                     onClick={() => setProfileOpen((v) => !v)}
-                    className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
                   >
                     <UserAvatar name={session.user.name} />
-                    <span className="text-sm font-medium text-gray-700">{session.user.name}</span>
+                    <span className="text-sm font-medium text-white">{session.user.name}</span>
                     <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
                   </button>
 
@@ -130,7 +130,7 @@ export default function Header() {
 
             {/* Mobile hamburger */}
             <button
-              className="md:hidden p-2 rounded-md text-gray-600 hover:text-indigo-600 transition-colors"
+              className="md:hidden p-2 rounded-md text-gray-300 hover:text-white transition-colors"
               onClick={() => setMenuOpen(true)}
               aria-label="Abrir menú"
             >
