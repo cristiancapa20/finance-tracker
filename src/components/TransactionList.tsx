@@ -3,6 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { sileo } from "sileo";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Tag,
+  Trash2,
+  Download,
+  CalendarDays,
+  ArrowUpDown,
+} from "lucide-react";
+import { getCategoryIcon } from "@/lib/categoryIcons";
 
 interface Category {
   id: string;
@@ -33,6 +44,7 @@ interface TransactionsResponse {
 
 const LIMIT = 20;
 
+
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
   return d.toLocaleDateString("es-ES", {
@@ -48,15 +60,16 @@ function formatAmount(amount: number, type: string) {
 }
 
 function TypeBadge({ type }: { type: string }) {
+  const isIncome = type === "INCOME";
+  const Icon = isIncome ? TrendingUp : TrendingDown;
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-        type === "INCOME"
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+        isIncome ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
       }`}
     >
-      {type === "INCOME" ? "Ingreso" : "Gasto"}
+      <Icon className="w-3 h-3" />
+      {isIncome ? "Ingreso" : "Gasto"}
     </span>
   );
 }
@@ -68,12 +81,15 @@ function CategoryBadge({
   name: string;
   color: string;
 }) {
+  const Icon = getCategoryIcon(name);
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-        style={{ backgroundColor: color }}
-      />
+        className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center"
+        style={{ backgroundColor: color + "22" }}
+      >
+        <Icon className="w-3.5 h-3.5" style={{ color }} />
+      </span>
       <span className="text-sm text-gray-700">{name}</span>
     </span>
   );
@@ -123,19 +139,7 @@ function DeleteButton({
       className="p-1 text-gray-400 hover:text-red-600 transition-colors"
       title="Eliminar transacción"
     >
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-        />
-      </svg>
+      <Trash2 className="w-4 h-4" />
     </button>
   );
 }
@@ -378,19 +382,7 @@ export default function TransactionList() {
               disabled={isExporting}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
+              <Download className="w-4 h-4" />
               {isExporting ? "Exportando..." : "Exportar CSV"}
             </button>
           </div>
@@ -432,19 +424,19 @@ export default function TransactionList() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha
+                    <span className="inline-flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />Fecha</span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Descripción
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoría
+                    <span className="inline-flex items-center gap-1"><Tag className="w-3.5 h-3.5" />Categoría</span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cuenta
+                    <span className="inline-flex items-center gap-1"><Wallet className="w-3.5 h-3.5" />Cuenta</span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tipo
+                    <span className="inline-flex items-center gap-1"><ArrowUpDown className="w-3.5 h-3.5" />Tipo</span>
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Monto
@@ -470,7 +462,10 @@ export default function TransactionList() {
                       />
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                      {t.account.name}
+                      <span className="inline-flex items-center gap-1.5">
+                        <Wallet className="w-3.5 h-3.5 text-gray-400" />
+                        {t.account.name}
+                      </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <TypeBadge type={t.type} />
@@ -539,7 +534,8 @@ export default function TransactionList() {
                       name={t.category.name}
                       color={t.category.color}
                     />
-                    <span className="text-xs text-gray-400">
+                    <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                      <Wallet className="w-3 h-3" />
                       {t.account.name}
                     </span>
                   </div>
