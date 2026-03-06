@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 interface SpeechRecognitionAlternative {
   transcript: string;
@@ -159,7 +159,7 @@ export default function TransactionForm() {
       const data: ParsedTransaction & { error?: string } = await res.json();
 
       if (!res.ok) {
-        sileo.error({ title: "Error al procesar la transacción", description: data.error });
+        toast.error({ title: "Error al procesar la transacción", description: data.error });
         return;
       }
 
@@ -181,7 +181,7 @@ export default function TransactionForm() {
         date: data.date ?? "",
       });
     } catch {
-      sileo.error({ title: "Error de red al procesar la transacción" });
+      toast.error({ title: "Error de red al procesar la transacción" });
     } finally {
       setIsParsing(false);
     }
@@ -208,16 +208,16 @@ export default function TransactionForm() {
       const data: { error?: string } = await res.json();
 
       if (!res.ok) {
-        sileo.error({ title: "Error al guardar la transacción", description: data.error });
+        toast.error({ title: "Error al guardar la transacción", description: data.error });
         return;
       }
 
-      sileo.success({ title: "Transacción guardada exitosamente" });
+      toast.success({ title: "Transacción guardada exitosamente" });
       setText("");
       setForm(null);
       setNullFields(new Set());
     } catch {
-      sileo.error({ title: "Error de red al guardar la transacción" });
+      toast.error({ title: "Error de red al guardar la transacción" });
     } finally {
       setIsSaving(false);
     }

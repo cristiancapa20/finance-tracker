@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 interface Rule {
   label: string;
@@ -58,7 +58,7 @@ export default function RegisterPage() {
         return;
       }
 
-      sileo.success({ title: "Cuenta creada, ya puedes iniciar sesión" });
+      toast.success({ title: "Cuenta creada, ya puedes iniciar sesión" });
       router.push("/login?registered=1");
     } finally {
       setLoading(false);

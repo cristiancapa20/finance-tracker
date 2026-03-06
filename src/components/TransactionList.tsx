@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import {
@@ -253,13 +253,13 @@ export default function TransactionList() {
       const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDeleteConfirmId(null);
-        sileo.success({ title: "Transacción eliminada" });
+        toast.success({ title: "Transacción eliminada" });
         await fetchTransactions();
       } else {
-        sileo.error({ title: "Error al eliminar la transacción" });
+        toast.error({ title: "Error al eliminar la transacción" });
       }
     } catch {
-      sileo.error({ title: "Error de red al eliminar la transacción" });
+      toast.error({ title: "Error de red al eliminar la transacción" });
     } finally {
       setIsDeleting(false);
     }

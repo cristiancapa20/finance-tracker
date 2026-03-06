@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Camera, User } from "lucide-react";
-import { sileo } from "sileo";
+import Image from "next/image";
+import { toast } from "@/lib/toast";
 
 interface Profile {
   id: string;
@@ -40,7 +41,7 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      sileo.error({ title: "La imagen no puede superar 2MB" });
+      toast.error({ title: "La imagen no puede superar 2MB" });
       return;
     }
 
@@ -62,9 +63,9 @@ export default function ProfilePage() {
       if (res.ok) {
         await update({ user: { ...session?.user, name: displayName || profile?.username } });
         router.refresh();
-        sileo.success({ title: "Perfil actualizado" });
+        toast.success({ title: "Perfil actualizado" });
       } else {
-        sileo.error({ title: "Error al guardar el perfil" });
+        toast.error({ title: "Error al guardar el perfil" });
       }
     } finally {
       setSaving(false);
@@ -91,7 +92,7 @@ export default function ProfilePage() {
               onClick={() => fileRef.current?.click()}
             >
               {avatar ? (
-                <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                <Image src={avatar} alt="Avatar" fill className="object-cover" unoptimized />
               ) : (
                 <span className="text-2xl font-bold text-indigo-600">{initials}</span>
               )}

@@ -5,6 +5,7 @@ import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { User, LogOut, ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 function UserAvatar({ name }: { name?: string | null }) {
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -20,7 +21,7 @@ function UserAvatar({ name }: { name?: string | null }) {
   return (
     <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-100 flex items-center justify-center flex-shrink-0">
       {avatar
-        ? <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+        ? <Image src={avatar} alt="Avatar" fill className="object-cover" unoptimized />
         : <span className="text-xs font-bold text-indigo-600">{initial}</span>
       }
     </div>
