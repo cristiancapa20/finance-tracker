@@ -361,29 +361,36 @@ export default function SettingsClient() {
 
       {/* Categories Section */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Categorías</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-1">Categorías</h2>
+        <p className="text-xs text-gray-500 mb-4">Las categorías iniciales vienen preinstaladas. Puedes crear las tuyas propias.</p>
 
         {/* Tab switcher */}
         <div className="flex gap-2 mb-3">
           <button
             onClick={() => setCategoryTab("system")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1.5 ${
               categoryTab === "system"
                 ? "bg-indigo-600 text-white border-indigo-600"
                 : "bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600"
             }`}
           >
-            Sistema
+            Iniciales
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${categoryTab === "system" ? "bg-indigo-500 text-white" : "bg-gray-100 text-gray-500"}`}>
+              {categories.filter(c => c.isSystem).length}
+            </span>
           </button>
           <button
             onClick={() => setCategoryTab("custom")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1.5 ${
               categoryTab === "custom"
                 ? "bg-indigo-600 text-white border-indigo-600"
                 : "bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600"
             }`}
           >
             Mis categorías
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${categoryTab === "custom" ? "bg-indigo-500 text-white" : "bg-gray-100 text-gray-500"}`}>
+              {categories.filter(c => !c.isSystem).length}
+            </span>
           </button>
         </div>
 
@@ -393,7 +400,7 @@ export default function SettingsClient() {
             <p className="text-sm text-gray-500 p-4">Cargando...</p>
           ) : categories.filter((c) => categoryTab === "system" ? c.isSystem : !c.isSystem).length === 0 ? (
             <p className="text-sm text-gray-500 p-4">
-              {categoryTab === "custom" ? "Aún no has creado categorías" : "No hay categorías"}
+              {categoryTab === "custom" ? "Aún no has creado categorías propias" : "No hay categorías iniciales"}
             </p>
           ) : (
             <ul className="divide-y divide-gray-100">
@@ -416,8 +423,8 @@ export default function SettingsClient() {
                     })()}
                     <p className="text-sm font-medium text-gray-800">{category.name}</p>
                     {category.isSystem && (
-                      <span className="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">
-                        Sistema
+                      <span className="inline-block bg-indigo-50 text-indigo-500 text-xs px-2 py-0.5 rounded-full">
+                        Inicial
                       </span>
                     )}
                   </div>
