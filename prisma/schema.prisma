@@ -20,6 +20,7 @@ model Account {
   id           String        @id @default(cuid())
   name         String
   type         String
+  color        String        @default("#1e3a5f")
   transactions Transaction[]
 }
 

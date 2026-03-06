@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Wallet, Building2, CreditCard, CircleDollarSign, Pencil, X } from "lucide-react";
 import { getCategoryIcon } from "@/lib/categoryIcons";
+import type { LucideIcon } from "lucide-react";
 
 type AccountType = "CASH" | "BANK" | "CREDIT_CARD" | "OTHER";
 
@@ -10,6 +11,7 @@ interface Account {
   id: string;
   name: string;
   type: AccountType;
+  color?: string;
   _count?: { transactions: number };
 }
 
@@ -28,6 +30,18 @@ const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
   OTHER: "Otro",
 };
 
+const ACCOUNT_TYPE_STYLES: Record<AccountType, { Icon: LucideIcon; color: string; bg: string }> = {
+  CASH:        { Icon: Wallet,           color: "#10b981", bg: "#10b98122" },
+  BANK:        { Icon: Building2,        color: "#3b82f6", bg: "#3b82f622" },
+  CREDIT_CARD: { Icon: CreditCard,       color: "#8b5cf6", bg: "#8b5cf622" },
+  OTHER:       { Icon: CircleDollarSign, color: "#f59e0b", bg: "#f59e0b22" },
+};
+
+const CARD_COLORS = [
+  "#1e3a5f", "#0f766e", "#7c3aed", "#be185d", "#b45309",
+  "#1d4ed8", "#065f46", "#831843", "#1e40af", "#374151",
+];
+
 const PRESET_COLORS = [
   "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7",
   "#DDA0DD", "#F0A500", "#6C5CE7", "#A29BFE", "#B2BEC3",
@@ -43,8 +57,15 @@ export default function SettingsClient() {
   // Account form state
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountType, setNewAccountType] = useState<AccountType>("CASH");
+  const [newAccountColor, setNewAccountColor] = useState("#1e3a5f");
   const [savingAccount, setSavingAccount] = useState(false);
   const [accountError, setAccountError] = useState("");
+
+  // Edit account state
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [editColor, setEditColor] = useState("#1e3a5f");
+  const [editName, setEditName] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Category form state
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -87,7 +108,7 @@ export default function SettingsClient() {
       const res = await fetch("/api/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newAccountName, type: newAccountType }),
+        body: JSON.stringify({ name: newAccountName, type: newAccountType, color: newAccountColor }),
       });
       if (!res.ok) {
         const json = await res.json();
@@ -96,6 +117,7 @@ export default function SettingsClient() {
       }
       setNewAccountName("");
       setNewAccountType("CASH");
+      setNewAccountColor("#1e3a5f");
       await fetchAccounts();
     } finally {
       setSavingAccount(false);
@@ -110,6 +132,31 @@ export default function SettingsClient() {
       return;
     }
     await fetchAccounts();
+  }
+
+  function openEditAccount(account: Account) {
+    setEditingAccount(account);
+    setEditColor(account.color ?? "#1e3a5f");
+    setEditName(account.name);
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingAccount) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/accounts/${editingAccount.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName, color: editColor }),
+      });
+      if (res.ok) {
+        setEditingAccount(null);
+        await fetchAccounts();
+      }
+    } finally {
+      setSavingEdit(false);
+    }
   }
 
   async function handleCreateCategory(e: React.FormEvent) {
@@ -151,32 +198,67 @@ export default function SettingsClient() {
       <section>
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Cuentas</h2>
 
-        {/* Account list */}
-        <div className="bg-white rounded-lg border border-gray-200 mb-4">
-          {loadingAccounts ? (
-            <p className="text-sm text-gray-500 p-4">Cargando...</p>
-          ) : accounts.length === 0 ? (
-            <p className="text-sm text-gray-500 p-4">No hay cuentas</p>
-          ) : (
-            <ul className="divide-y divide-gray-100">
-              {accounts.map((account) => (
-                <li
+        {/* Account list as cards */}
+        {loadingAccounts ? (
+          <p className="text-sm text-gray-500 mb-4">Cargando...</p>
+        ) : accounts.length === 0 ? (
+          <p className="text-sm text-gray-500 mb-4">No hay cuentas</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            {accounts.map((account) => {
+              const { Icon } = ACCOUNT_TYPE_STYLES[account.type];
+              return (
+                <div
                   key={account.id}
-                  className="flex items-center justify-between px-4 py-3"
+                  className="relative rounded-2xl overflow-hidden h-36 p-5 flex flex-col justify-between select-none shadow-md"
+                  style={{ background: `linear-gradient(135deg, ${account.color ?? "#1e3a5f"}ee, ${account.color ?? "#1e3a5f"}99)` }}
                 >
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{account.name}</p>
-                    <p className="text-xs text-gray-500">{ACCOUNT_TYPE_LABELS[account.type]}</p>
-                  </div>
-                  <DeleteButton
-                    onDelete={() => handleDeleteAccount(account.id)}
-                    label="Eliminar cuenta"
+                  {/* Background decoration */}
+                  <div
+                    className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-20"
+                    style={{ backgroundColor: "#ffffff" }}
                   />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                  <div
+                    className="absolute -right-2 top-10 w-16 h-16 rounded-full opacity-10"
+                    style={{ backgroundColor: "#ffffff" }}
+                  />
+
+                  {/* Top row */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-white/80 text-xs font-medium tracking-wide uppercase">
+                        {ACCOUNT_TYPE_LABELS[account.type]}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openEditAccount(account)}
+                        title="Editar cuenta"
+                        className="w-7 h-7 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: "#F0A50033" }}
+                      >
+                        <Pencil className="w-3.5 h-3.5" style={{ color: "#F0A500" }} />
+                      </button>
+                      <DeleteButton
+                        onDelete={() => handleDeleteAccount(account.id)}
+                        label="Eliminar cuenta"
+                        light
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account name */}
+                  <div className="relative z-10">
+                    <p className="text-white font-semibold text-lg leading-tight truncate">{account.name}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Create account form */}
         <form onSubmit={handleCreateAccount} className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
@@ -212,6 +294,32 @@ export default function SettingsClient() {
                 <option key={value} value={value}>{label}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-2">Color de la tarjeta</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {CARD_COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setNewAccountColor(color)}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform ${
+                    newAccountColor === color ? "border-gray-800 scale-110" : "border-transparent hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">O elige un color:</span>
+              <input
+                type="color"
+                value={newAccountColor}
+                onChange={(e) => setNewAccountColor(e.target.value)}
+                className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+              />
+              <span className="inline-block w-5 h-5 rounded-full border border-gray-200" style={{ backgroundColor: newAccountColor }} />
+            </div>
           </div>
           <button
             type="submit"
@@ -333,11 +441,94 @@ export default function SettingsClient() {
           </button>
         </form>
       </section>
+      {/* Edit Account Modal */}
+      {editingAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-base font-semibold text-gray-800">Editar cuenta</h3>
+              <button
+                onClick={() => setEditingAccount(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Preview card */}
+            <div
+              className="relative rounded-xl overflow-hidden h-24 p-4 mb-5 flex flex-col justify-between"
+              style={{ background: `linear-gradient(135deg, ${editColor}ee, ${editColor}99)` }}
+            >
+              <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/20" />
+              <div className="flex items-center gap-2 relative z-10">
+                {(() => { const { Icon } = ACCOUNT_TYPE_STYLES[editingAccount.type]; return <Icon className="w-4 h-4 text-white/80" />; })()}
+                <span className="text-white/70 text-xs uppercase tracking-wide">{ACCOUNT_TYPE_LABELS[editingAccount.type]}</span>
+              </div>
+              <p className="text-white font-semibold text-base relative z-10 truncate">{editName || editingAccount.name}</p>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-2">Color</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {CARD_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setEditColor(color)}
+                      className={`w-7 h-7 rounded-full border-2 transition-transform ${
+                        editColor === color ? "border-gray-800 scale-110" : "border-transparent hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">O elige:</span>
+                  <input
+                    type="color"
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setEditingAccount(null)}
+                  className="flex-1 border border-gray-300 text-gray-600 text-sm font-medium py-2 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="flex-1 bg-indigo-600 text-white text-sm font-medium py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingEdit ? "Guardando..." : "Guardar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function DeleteButton({ onDelete, label }: { onDelete: () => void; label: string }) {
+function DeleteButton({ onDelete, label, light }: { onDelete: () => void; label: string; light?: boolean }) {
   const [confirming, setConfirming] = useState(false);
 
   if (confirming) {
@@ -351,7 +542,7 @@ function DeleteButton({ onDelete, label }: { onDelete: () => void; label: string
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded transition-colors"
+          className={`text-xs px-2 py-1 rounded transition-colors ${light ? "text-white/70 hover:text-white" : "text-gray-500 hover:text-gray-700"}`}
         >
           Cancelar
         </button>
@@ -363,9 +554,10 @@ function DeleteButton({ onDelete, label }: { onDelete: () => void; label: string
     <button
       onClick={() => setConfirming(true)}
       aria-label={label}
-      className="text-gray-400 hover:text-red-500 transition-colors p-1 rounded"
+      className="w-7 h-7 rounded-full flex items-center justify-center"
+      style={{ backgroundColor: "#ef444433" }}
     >
-      <Trash2 className="w-4 h-4" />
+      <Trash2 className="w-4 h-4" style={{ color: "#ef4444" }} />
     </button>
   );
 }

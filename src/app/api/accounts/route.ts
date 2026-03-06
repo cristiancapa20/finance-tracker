@@ -4,17 +4,22 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const accounts = await prisma.account.findMany({
+      select: { id: true, name: true, type: true, color: true },
+      orderBy: { name: "asc" },
+    });
+
+    return NextResponse.json({ data: accounts });
+  } catch (error) {
+    console.error("GET /api/accounts error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const accounts = await prisma.account.findMany({
-    select: { id: true, name: true, type: true },
-    orderBy: { name: "asc" },
-  });
-
-  return NextResponse.json({ data: accounts });
 }
 
 export async function POST(req: NextRequest) {
@@ -24,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, type } = body;
+  const { name, type, color } = body;
 
   if (!name || !type) {
     return NextResponse.json({ error: "Name and type are required" }, { status: 400 });
@@ -36,8 +41,8 @@ export async function POST(req: NextRequest) {
   }
 
   const account = await prisma.account.create({
-    data: { name, type },
-    select: { id: true, name: true, type: true },
+    data: { name, type, ...(color ? { color } : {}) },
+    select: { id: true, name: true, type: true, color: true },
   });
 
   return NextResponse.json({ data: account }, { status: 201 });
