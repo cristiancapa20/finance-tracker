@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { sileo } from "sileo";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
+import { useTransitionRouter } from "next-view-transitions";
 import {
   TrendingUp,
   TrendingDown,
@@ -145,7 +146,7 @@ function DeleteButton({
 }
 
 export default function TransactionList() {
-  const router = useRouter();
+  const router = useTransitionRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 

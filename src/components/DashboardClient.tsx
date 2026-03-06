@@ -189,7 +189,13 @@ export default function DashboardClient() {
       {accounts.length > 0 && (
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => setSelectedAccountId("")}
+            onClick={() => {
+              if (document.startViewTransition) {
+                document.startViewTransition(() => setSelectedAccountId(""));
+              } else {
+                setSelectedAccountId("");
+              }
+            }}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
               selectedAccountId === ""
                 ? "bg-indigo-600 text-white border-indigo-600"
@@ -201,7 +207,13 @@ export default function DashboardClient() {
           {accounts.map((account) => (
             <button
               key={account.id}
-              onClick={() => setSelectedAccountId(account.id)}
+              onClick={() => {
+                if (document.startViewTransition) {
+                  document.startViewTransition(() => setSelectedAccountId(account.id));
+                } else {
+                  setSelectedAccountId(account.id);
+                }
+              }}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
                 selectedAccountId === account.id
                   ? "bg-indigo-600 text-white border-indigo-600"
