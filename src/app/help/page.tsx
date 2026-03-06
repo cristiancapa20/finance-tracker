@@ -7,8 +7,6 @@ import {
   Plus,
   History,
   LayoutDashboard,
-  Pencil,
-  Trash2,
   Settings,
   ChevronRight,
   CheckCircle2,

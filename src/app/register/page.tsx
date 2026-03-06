@@ -223,9 +223,9 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           ¿Ya tienes cuenta?{" "}
-          <a href="/login" className="text-indigo-600 font-medium hover:underline">
+          <Link href="/login" className="text-indigo-600 font-medium hover:underline">
             Inicia sesión
-          </a>
+          </Link>
         </p>
       </div>
     </div>
