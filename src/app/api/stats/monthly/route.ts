@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const entry = monthMap.get(key);
     if (!entry) continue;
     const amount = t.amount / 100;
-    if (t.type === "income") {
+    if (t.type === "INCOME") {
       entry.income += amount;
     } else {
       entry.expenses += amount;

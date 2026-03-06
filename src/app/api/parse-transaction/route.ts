@@ -66,7 +66,7 @@ Transaction text: "${text}"`;
       throw new Error("Unexpected response type from Claude");
     }
 
-    const jsonText = content.text.trim();
+    const jsonText = content.text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
     parsed = JSON.parse(jsonText);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

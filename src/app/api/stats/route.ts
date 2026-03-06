@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
   for (const t of transactions) {
     const amount = t.amount / 100;
-    if (t.type === "income") {
+    if (t.type === "INCOME") {
       totalIncome += amount;
     } else {
       totalExpenses += amount;

@@ -3,10 +3,10 @@
   "sessionId": "3399aeaf-f0ce-43ca-8a2e-076fe7de25ba",
   "status": "running",
   "startedAt": "2026-03-06T01:03:04.044Z",
-  "updatedAt": "2026-03-06T01:15:44.192Z",
-  "currentIteration": 0,
+  "updatedAt": "2026-03-06T01:51:17.503Z",
+  "currentIteration": 1,
   "maxIterations": 0,
-  "tasksCompleted": 0,
+  "tasksCompleted": 1,
   "isPaused": false,
   "agentPlugin": "claude",
   "trackerState": {
@@ -77,12 +77,23 @@
       {
         "id": "US-011",
         "title": "Página de configuración: gestión de cuentas y categorías",
-        "status": "open",
-        "completedInSession": false
+        "status": "completed",
+        "completedInSession": true
       }
     ]
   },
-  "iterations": [],
+  "iterations": [
+    {
+      "iteration": 1,
+      "status": "completed",
+      "taskId": "US-011",
+      "taskTitle": "Página de configuración: gestión de cuentas y categorías",
+      "taskCompleted": true,
+      "durationMs": 752814,
+      "startedAt": "2026-03-06T01:03:11.376Z",
+      "endedAt": "2026-03-06T01:15:44.190Z"
+    }
+  ],
   "skippedTaskIds": [],
   "cwd": "/Users/cristian/Desktop/finance",
   "activeTaskIds": [],
