@@ -1,0 +1,63 @@
+# Iteration 1 Log
+
+## Metadata
+
+- **Task ID**: US-010
+- **Task Title**: Exportación de transacciones a CSV
+- **Description**: As a user, I want to export my filtered transactions to a CSV file so that I can analyze them in Excel or Google Sheets.
+- **Status**: completed
+- **Task Completed**: Yes
+- **Promise Detected**: Yes
+- **Started At**: 2026-03-06T00:48:55.795Z
+- **Ended At**: 2026-03-06T01:00:21.741Z
+- **Duration**: 11m 25s
+- **Input Tokens**: 56
+- **Output Tokens**: 4661
+- **Total Tokens**: 4717
+- **Agent**: claude
+- **Model**: claude-sonnet-4-6
+- **Sandbox Mode**: auto
+- **Sandbox Network**: Enabled
+--- RAW OUTPUT ---
+[94m[ToolSearch][0m query: [93mselect:Read,Glob[0m
+[94m[Read][0m [95m/Users/cristian/Desktop/finance/.ralph-tui/progress.md[0m
+[94m[Read][0m [95m/Users/cristian/.claude/projects/-Users-cristian-Desktop-finance/memory/MEMORY.md[0m
+
+[91m[Error: File does not exist. Note: your current working directory is /Users/cristian/Desktop/finance.][0m
+[94m[Glob][0m [95m/Users/cristian/Desktop/finance[0m pattern: [96msrc/**/*.ts[0m
+[94m[Glob][0m [95m/Users/cristian/Desktop/finance[0m pattern: [96msrc/**/*.tsx[0m
+[94m[Read][0m [95m/Users/cristian/Desktop/finance/src/app/api/transactions/route.ts[0m
+[94m[Read][0m [95m/Users/cristian/Desktop/finance/src/app/transactions/page.tsx[0m
+[94m[Read][0m [95m/Users/cristian/Desktop/finance/src/components/TransactionList.tsx[0m
+Now I have a clear picture. I need to:
+1. Create `/api/transactions/export` endpoint
+2. Add "Exportar CSV" button to `TransactionList.tsx`
+[94m[ToolSearch][0m query: [93mselect:Write,Edit[0m
+[94m[Write][0m [95m/Users/cristian/Desktop/finance/src/app/api/transactions/export/route.ts[0m "import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
+import { authOptions } from "@/lib/auth";
+import { prism... (2533 chars)"
+Now add the "Exportar CSV" button to the TransactionList component. I'll add it in the filters bar and implement the export handler:
+[94m[Edit][0m [95m/Users/cristian/Desktop/finance/src/components/TransactionList.tsx[0m edit: "  const [categories, setCategories] = useState<Cat..." → "  const [categories, setCategories] = useState<Cat..."
+[94m[Edit][0m [95m/Users/cristian/Desktop/finance/src/components/TransactionList.tsx[0m edit: "  async function handleConfirmDelete(id: string) {" → "  async function handleExportCsv() {
+    setIsExpo..."
+Now add the export button to the filters bar:
+[94m[Edit][0m [95m/Users/cristian/Desktop/finance/src/components/TransactionList.tsx[0m edit: "          {(typeParam || categoryIdParam || dateFr..." → "          {(typeParam || categoryIdParam || dateFr..."
+Now let's run typecheck and lint:
+[94m[ToolSearch][0m query: [93mselect:Bash[0m
+[94m[Bash][0m Run TypeScript type check $ npm run typecheck 2>&1
+[94m[Bash][0m Run ESLint $ npm run lint 2>&1
+Both pass. Now update the progress file:
+[94m[ToolSearch][0m query: [93mselect:Edit[0m
+[94m[Edit][0m [95m/Users/cristian/Desktop/finance/.ralph-tui/progress.md[0m edit: "---
+
+" → "## Codebase Patterns
+
+- **API filters pattern**: T..."
+Both `npm run typecheck` and `npm run lint` pass. Implementation is complete:
+
+- **`/api/transactions/export`** — new GET endpoint accepting `type`, `categoryId`, `dateFrom`, `dateTo` filters. Returns UTF-8 BOM CSV with columns: Fecha, Descripción, Categoría, Cuenta, Tipo, Monto. Filename: `transacciones-YYYY-MM.csv`.
+- **`TransactionList.tsx`** — added "Exportar CSV" button that builds params from active filters and triggers an automatic browser download.
+
+<promise>COMPLETE</promise>
