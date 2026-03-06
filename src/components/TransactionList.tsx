@@ -10,6 +10,8 @@ import {
   Wallet,
   Tag,
   Trash2,
+  Pencil,
+  X,
   Download,
   CalendarDays,
   ArrowUpDown,
@@ -145,6 +147,117 @@ function DeleteButton({
   );
 }
 
+interface EditModalProps {
+  transaction: Transaction;
+  categories: Category[];
+  accounts: Account[];
+  onClose: () => void;
+  onSaved: (updated: Transaction) => void;
+}
+
+function EditModal({ transaction: t, categories, accounts, onClose, onSaved }: EditModalProps) {
+  const [form, setForm] = useState({
+    amount: String(t.amount),
+    type: t.type,
+    categoryId: t.category.id,
+    accountId: t.account.id,
+    description: t.description ?? "",
+    date: t.date.split("T")[0],
+  });
+  const [saving, setSaving] = useState(false);
+
+  function update(field: string, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/transactions/${t.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: Number(form.amount),
+          type: form.type,
+          categoryId: form.categoryId,
+          accountId: form.accountId,
+          description: form.description || null,
+          date: form.date,
+        }),
+      });
+      if (res.ok) {
+        const { data } = await res.json();
+        toast.success({ title: "Transacción actualizada" });
+        onSaved(data);
+      } else {
+        toast.error({ title: "Error al actualizar la transacción" });
+      }
+    } catch {
+      toast.error({ title: "Error de red" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const inputBase = "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">Editar transacción</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <form onSubmit={handleSave} className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Monto</label>
+            <input type="number" min="0" step="0.01" value={form.amount} onChange={(e) => update("amount", e.target.value)} className={inputBase} required />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+            <select value={form.type} onChange={(e) => update("type", e.target.value)} className={inputBase} required>
+              <option value="INCOME">Ingreso</option>
+              <option value="EXPENSE">Gasto</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+            <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputBase} required>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Cuenta</label>
+            <select value={form.accountId} onChange={(e) => update("accountId", e.target.value)} className={inputBase} required>
+              {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+            <input type="text" value={form.description} onChange={(e) => update("description", e.target.value)} className={inputBase} placeholder="Sin descripción" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
+            <input type="date" value={form.date} onChange={(e) => update("date", e.target.value)} className={inputBase} required />
+          </div>
+          <div className="sm:col-span-2 flex gap-3 pt-2">
+            <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+              {saving && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+              {saving ? "Guardando..." : "Guardar cambios"}
+            </button>
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function TransactionList() {
   const router = useTransitionRouter();
   const pathname = usePathname();
@@ -165,6 +278,12 @@ export default function TransactionList() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  function handleSaved(updated: Transaction) {
+    setTransactions((prev) => prev.map((t) => t.id === updated.id ? updated : t));
+    setEditingTransaction(null);
+  }
 
   useEffect(() => {
     Promise.all([
@@ -481,14 +600,23 @@ export default function TransactionList() {
                       {formatAmount(t.amount, t.type)}
                     </td>
                     <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <DeleteButton
-                        id={t.id}
-                        confirmId={deleteConfirmId}
-                        isDeleting={isDeleting}
-                        onRequestDelete={(id) => setDeleteConfirmId(id)}
-                        onConfirmDelete={handleConfirmDelete}
-                        onCancelDelete={() => setDeleteConfirmId(null)}
-                      />
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setEditingTransaction(t)}
+                          className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                          title="Editar transacción"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <DeleteButton
+                          id={t.id}
+                          confirmId={deleteConfirmId}
+                          isDeleting={isDeleting}
+                          onRequestDelete={(id) => setDeleteConfirmId(id)}
+                          onConfirmDelete={handleConfirmDelete}
+                          onCancelDelete={() => setDeleteConfirmId(null)}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -540,14 +668,23 @@ export default function TransactionList() {
                       {t.account.name}
                     </span>
                   </div>
-                  <DeleteButton
-                    id={t.id}
-                    confirmId={deleteConfirmId}
-                    isDeleting={isDeleting}
-                    onRequestDelete={(id) => setDeleteConfirmId(id)}
-                    onConfirmDelete={handleConfirmDelete}
-                    onCancelDelete={() => setDeleteConfirmId(null)}
-                  />
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setEditingTransaction(t)}
+                      className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <DeleteButton
+                      id={t.id}
+                      confirmId={deleteConfirmId}
+                      isDeleting={isDeleting}
+                      onRequestDelete={(id) => setDeleteConfirmId(id)}
+                      onConfirmDelete={handleConfirmDelete}
+                      onCancelDelete={() => setDeleteConfirmId(null)}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -583,6 +720,16 @@ export default function TransactionList() {
             </div>
           )}
         </>
+      )}
+
+      {editingTransaction && (
+        <EditModal
+          transaction={editingTransaction}
+          categories={categories}
+          accounts={accounts}
+          onClose={() => setEditingTransaction(null)}
+          onSaved={handleSaved}
+        />
       )}
     </div>
   );
