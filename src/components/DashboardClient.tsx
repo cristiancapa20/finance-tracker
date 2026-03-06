@@ -14,6 +14,54 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+interface ChartLegendProps {
+  payload?: { value: string; color: string }[];
+}
+
+function RoundedLegend({ payload }: ChartLegendProps) {
+  if (!payload?.length) return null;
+  return (
+    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2">
+      {payload.map((entry, i) => (
+        <span key={i} className="flex items-center gap-1.5 text-sm text-gray-600">
+          <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+          {entry.value}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: { name: string; value: number; color: string }[];
+  label?: string;
+}
+
+function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl shadow-md px-4 py-3 text-sm">
+      {label && (
+        <p className="text-gray-500 text-xs mb-2 font-medium">
+          {formatMonthLabel(label)}
+        </p>
+      )}
+      {payload.map((entry, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span
+            className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-gray-600">{entry.name}:</span>
+          <span className="font-semibold text-gray-900">
+            {formatCurrency(entry.value)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 interface ExpensesByCategory {
   categoryId: string;
@@ -216,12 +264,8 @@ export default function DashboardClient() {
                     <Cell key={entry.categoryId} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                <Legend
-                  formatter={(value) => (
-                    <span className="text-sm text-gray-600">{value}</span>
-                  )}
-                />
+                <Tooltip content={<ChartTooltip />} />
+                <Legend content={<RoundedLegend />} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -253,11 +297,8 @@ export default function DashboardClient() {
                   tick={{ fontSize: 11 }}
                 />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
-                <Tooltip
-                  formatter={(value) => formatCurrency(Number(value))}
-                  labelFormatter={(label) => formatMonthLabel(String(label))}
-                />
-                <Legend />
+                <Tooltip content={<ChartTooltip />} />
+                <Legend content={<RoundedLegend />} />
                 <Bar dataKey="income" name="Ingresos" fill="#10b981" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="expenses" name="Gastos" fill="#ef4444" radius={[3, 3, 0, 0]} />
               </BarChart>
