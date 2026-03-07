@@ -1,46 +1,42 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "@/lib/toast";
 
-interface SpeechRecognitionAlternative {
-  transcript: string;
-}
-
-interface SpeechRecognitionResult {
-  readonly length: number;
-  isFinal: boolean;
-  [index: number]: SpeechRecognitionAlternative;
-}
-
-interface SpeechRecognitionResultList {
-  readonly length: number;
-  [index: number]: SpeechRecognitionResult;
-}
-
-interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionInstance extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start(): void;
-  stop(): void;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => SpeechRecognitionInstance;
-    webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
-  }
-}
+// Mic feature temporarily disabled
+// interface SpeechRecognitionAlternative {
+//   transcript: string;
+// }
+// interface SpeechRecognitionResult {
+//   readonly length: number;
+//   isFinal: boolean;
+//   [index: number]: SpeechRecognitionAlternative;
+// }
+// interface SpeechRecognitionResultList {
+//   readonly length: number;
+//   [index: number]: SpeechRecognitionResult;
+// }
+// interface SpeechRecognitionEvent extends Event {
+//   resultIndex: number;
+//   results: SpeechRecognitionResultList;
+// }
+// interface SpeechRecognitionInstance extends EventTarget {
+//   lang: string;
+//   continuous: boolean;
+//   interimResults: boolean;
+//   onresult: ((event: SpeechRecognitionEvent) => void) | null;
+//   onend: (() => void) | null;
+//   onerror: (() => void) | null;
+//   start(): void;
+//   stop(): void;
+// }
+// declare global {
+//   interface Window {
+//     SpeechRecognition?: new () => SpeechRecognitionInstance;
+//     webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
+//   }
+// }
 
 interface Category {
   id: string;
@@ -79,9 +75,9 @@ export default function TransactionForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [accountsLoaded, setAccountsLoaded] = useState(false);
-  const [micState, setMicState] = useState<"idle" | "recording">("idle");
-  const [speechSupported, setSpeechSupported] = useState<boolean | null>(null);
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  // const [micState, setMicState] = useState<"idle" | "recording">("idle");
+  // const [speechSupported, setSpeechSupported] = useState<boolean | null>(null);
+  // const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -94,60 +90,44 @@ export default function TransactionForm() {
     });
   }, []);
 
-  useEffect(() => {
-    setSpeechSupported(
-      typeof window !== "undefined" &&
-        ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
-    );
-  }, []);
+  // useEffect(() => {
+  //   setSpeechSupported(
+  //     typeof window !== "undefined" &&
+  //       ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+  //   );
+  // }, []);
 
-  function startRecording() {
-    const SpeechRecognitionAPI =
-      window.SpeechRecognition ?? window.webkitSpeechRecognition;
-    if (!SpeechRecognitionAPI) return;
+  // function startRecording() {
+  //   const SpeechRecognitionAPI =
+  //     window.SpeechRecognition ?? window.webkitSpeechRecognition;
+  //   if (!SpeechRecognitionAPI) return;
+  //   const recognition = new SpeechRecognitionAPI();
+  //   recognition.lang = "es-ES";
+  //   recognition.continuous = true;
+  //   recognition.interimResults = true;
+  //   let finalTranscript = "";
+  //   recognition.onresult = (event: SpeechRecognitionEvent) => {
+  //     let final = "";
+  //     let interim = "";
+  //     for (let i = 0; i < event.results.length; i++) {
+  //       if (event.results[i].isFinal) final += event.results[i][0].transcript;
+  //       else interim += event.results[i][0].transcript;
+  //     }
+  //     finalTranscript = final;
+  //     setText(final + interim);
+  //   };
+  //   recognition.onend = () => {
+  //     setMicState("idle");
+  //     if (finalTranscript.trim()) { setText(finalTranscript); handleParse(finalTranscript); }
+  //   };
+  //   recognition.onerror = () => { setMicState("idle"); };
+  //   recognitionRef.current = recognition;
+  //   recognition.start();
+  //   setMicState("recording");
+  //   setText("");
+  // }
 
-    const recognition = new SpeechRecognitionAPI();
-    recognition.lang = "es-ES";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    let finalTranscript = "";
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let final = "";
-      let interim = "";
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          final += event.results[i][0].transcript;
-        } else {
-          interim += event.results[i][0].transcript;
-        }
-      }
-      finalTranscript = final;
-      setText(final + interim);
-    };
-
-    recognition.onend = () => {
-      setMicState("idle");
-      if (finalTranscript.trim()) {
-        setText(finalTranscript);
-        handleParse(finalTranscript);
-      }
-    };
-
-    recognition.onerror = () => {
-      setMicState("idle");
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
-    setMicState("recording");
-    setText("");
-  }
-
-  function stopRecording() {
-    recognitionRef.current?.stop();
-  }
+  // function stopRecording() { recognitionRef.current?.stop(); }
 
   async function handleParse(inputText?: string) {
     const textToProcess = inputText ?? text;

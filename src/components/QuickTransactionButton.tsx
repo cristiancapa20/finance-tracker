@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { toast } from "@/lib/toast";
@@ -27,36 +27,37 @@ interface FormState {
   date: string;
 }
 
-interface SpeechRecognitionAlternative { transcript: string }
-interface SpeechRecognitionResult {
-  readonly length: number;
-  isFinal: boolean;
-  [index: number]: SpeechRecognitionAlternative;
-}
-interface SpeechRecognitionResultList {
-  readonly length: number;
-  [index: number]: SpeechRecognitionResult;
-}
-interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-interface SpeechRecognitionInstance extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start(): void;
-  stop(): void;
-}
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => SpeechRecognitionInstance;
-    webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
-  }
-}
+// Mic feature temporarily disabled
+// interface SpeechRecognitionAlternative { transcript: string }
+// interface SpeechRecognitionResult {
+//   readonly length: number;
+//   isFinal: boolean;
+//   [index: number]: SpeechRecognitionAlternative;
+// }
+// interface SpeechRecognitionResultList {
+//   readonly length: number;
+//   [index: number]: SpeechRecognitionResult;
+// }
+// interface SpeechRecognitionEvent extends Event {
+//   resultIndex: number;
+//   results: SpeechRecognitionResultList;
+// }
+// interface SpeechRecognitionInstance extends EventTarget {
+//   lang: string;
+//   continuous: boolean;
+//   interimResults: boolean;
+//   onresult: ((event: SpeechRecognitionEvent) => void) | null;
+//   onend: (() => void) | null;
+//   onerror: (() => void) | null;
+//   start(): void;
+//   stop(): void;
+// }
+// declare global {
+//   interface Window {
+//     SpeechRecognition?: new () => SpeechRecognitionInstance;
+//     webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
+//   }
+// }
 
 function CategoryBadge({ name, color }: { name: string; color: string }) {
   const Icon = getCategoryIcon(name);
@@ -80,9 +81,9 @@ export default function QuickTransactionButton() {
   const [categories, setCategories]     = useState<Category[]>([]);
   const [accounts, setAccounts]         = useState<Account[]>([]);
   const [accountsLoaded, setAccountsLoaded] = useState(false);
-  const [micState, setMicState]         = useState<"idle" | "recording">("idle");
-  const [speechSupported, setSpeechSupported] = useState<boolean | null>(null);
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  // const [micState, setMicState]         = useState<"idle" | "recording">("idle");
+  // const [speechSupported, setSpeechSupported] = useState<boolean | null>(null);
+  // const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   /* ── load categories & accounts once ── */
   useEffect(() => {
@@ -96,12 +97,12 @@ export default function QuickTransactionButton() {
     });
   }, []);
 
-  useEffect(() => {
-    setSpeechSupported(
-      typeof window !== "undefined" &&
-        ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
-    );
-  }, []);
+  // useEffect(() => {
+  //   setSpeechSupported(
+  //     typeof window !== "undefined" &&
+  //       ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+  //   );
+  // }, []);
 
   /* ── scroll lock + ESC close ── */
   useEffect(() => {
@@ -116,45 +117,45 @@ export default function QuickTransactionButton() {
   }, [isOpen]);
 
   function handleClose() {
-    recognitionRef.current?.stop();
-    setMicState("idle");
+    // recognitionRef.current?.stop();
+    // setMicState("idle");
     setIsOpen(false);
     setText("");
     setForm(null);
     setNullFields(new Set());
   }
 
-  /* ── voice ── */
-  function startRecording() {
-    const API = window.SpeechRecognition ?? window.webkitSpeechRecognition;
-    if (!API) return;
-    const rec = new API();
-    rec.lang = "es-ES";
-    rec.continuous = true;
-    rec.interimResults = true;
-    let final = "";
-    rec.onresult = (e: SpeechRecognitionEvent) => {
-      let finalText = "";
-      let interim = "";
-      for (let i = 0; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
-        else interim += e.results[i][0].transcript;
-      }
-      final = finalText;
-      setText(finalText + interim);
-    };
-    rec.onend = () => {
-      setMicState("idle");
-      if (final.trim()) { setText(final); handleParse(final); }
-    };
-    rec.onerror = () => setMicState("idle");
-    recognitionRef.current = rec;
-    rec.start();
-    setMicState("recording");
-    setText("");
-  }
+  /* ── voice (temporalmente deshabilitado) ── */
+  // function startRecording() {
+  //   const API = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+  //   if (!API) return;
+  //   const rec = new API();
+  //   rec.lang = "es-ES";
+  //   rec.continuous = true;
+  //   rec.interimResults = true;
+  //   let final = "";
+  //   rec.onresult = (e: SpeechRecognitionEvent) => {
+  //     let finalText = "";
+  //     let interim = "";
+  //     for (let i = 0; i < e.results.length; i++) {
+  //       if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+  //       else interim += e.results[i][0].transcript;
+  //     }
+  //     final = finalText;
+  //     setText(finalText + interim);
+  //   };
+  //   rec.onend = () => {
+  //     setMicState("idle");
+  //     if (final.trim()) { setText(final); handleParse(final); }
+  //   };
+  //   rec.onerror = () => setMicState("idle");
+  //   recognitionRef.current = rec;
+  //   rec.start();
+  //   setMicState("recording");
+  //   setText("");
+  // }
 
-  function stopRecording() { recognitionRef.current?.stop(); }
+  // function stopRecording() { recognitionRef.current?.stop(); }
 
   /* ── parse ── */
   async function handleParse(inputText?: string) {
