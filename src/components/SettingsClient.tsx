@@ -71,7 +71,8 @@ export default function SettingsClient() {
   const [editName, setEditName] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
-  // Category form state
+  // Category modal state
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryColor, setNewCategoryColor] = useState(PRESET_COLORS[0]);
   const [savingCategory, setSavingCategory] = useState(false);
@@ -180,8 +181,19 @@ export default function SettingsClient() {
     }
   }
 
-  async function handleCreateCategory(e: React.FormEvent) {
-    e.preventDefault();
+  function openCategoryModal() {
+    setNewCategoryName("");
+    setNewCategoryColor(PRESET_COLORS[0]);
+    setCategoryError("");
+    setShowCategoryModal(true);
+  }
+
+  function closeCategoryModal() {
+    setShowCategoryModal(false);
+    setCategoryError("");
+  }
+
+  async function handleCreateCategory() {
     setCategoryError("");
     setSavingCategory(true);
     try {
@@ -195,8 +207,7 @@ export default function SettingsClient() {
         setCategoryError(json.error ?? "Error al crear categoría");
         return;
       }
-      setNewCategoryName("");
-      setNewCategoryColor(PRESET_COLORS[0]);
+      closeCategoryModal();
       await fetchCategories();
       toast.success({ title: "Categoría creada exitosamente" });
     } finally {
@@ -219,7 +230,16 @@ export default function SettingsClient() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Accounts Section */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Cuentas</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Cuentas</h2>
+          <button
+            onClick={openCreateModal}
+            className="flex items-center gap-1.5 bg-indigo-600 text-white text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <span className="text-base leading-none">+</span>
+            Nueva cuenta
+          </button>
+        </div>
 
         {/* Account list as cards */}
         {loadingAccounts ? (
@@ -293,19 +313,20 @@ export default function SettingsClient() {
           </div>
         )}
 
-        {/* Nueva cuenta button */}
-        <button
-          onClick={openCreateModal}
-          className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-indigo-300 text-indigo-600 text-sm font-medium py-3 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
-        >
-          <span className="text-lg leading-none">+</span>
-          Nueva cuenta bancaria
-        </button>
       </section>
 
       {/* Categories Section */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-1">Categorías</h2>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-lg font-semibold text-gray-800">Categorías</h2>
+          <button
+            onClick={openCategoryModal}
+            className="flex items-center gap-1.5 bg-indigo-600 text-white text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <span className="text-base leading-none">+</span>
+            Nueva categoría
+          </button>
+        </div>
         <p className="text-xs text-gray-500 mb-4">Las categorías iniciales vienen preinstaladas. Puedes crear las tuyas propias.</p>
 
         {/* Tab switcher */}
@@ -384,67 +405,6 @@ export default function SettingsClient() {
           )}
         </div>
 
-        {/* Create category form */}
-        <form onSubmit={handleCreateCategory} className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
-          <h3 className="text-sm font-medium text-gray-700">Nueva categoría</h3>
-          {categoryError && (
-            <p className="text-sm text-red-600">{categoryError}</p>
-          )}
-          <div>
-            <label htmlFor="categoryName" className="block text-xs text-gray-600 mb-1">
-              Nombre
-            </label>
-            <input
-              id="categoryName"
-              type="text"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              placeholder="Ej: Gimnasio"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-2">Color</label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setNewCategoryColor(color)}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                    newCategoryColor === color
-                      ? "border-gray-800 scale-110"
-                      : "border-transparent hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: color }}
-                  aria-label={`Color ${color}`}
-                />
-              ))}
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-gray-500">O elige un color:</span>
-              <input
-                type="color"
-                value={newCategoryColor}
-                onChange={(e) => setNewCategoryColor(e.target.value)}
-                className="w-8 h-8 rounded cursor-pointer border border-gray-300"
-                aria-label="Color personalizado"
-              />
-              <span
-                className="inline-block w-5 h-5 rounded-full border border-gray-200"
-                style={{ backgroundColor: newCategoryColor }}
-              />
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={savingCategory}
-            className="w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
-            {savingCategory ? "Creando..." : "Crear categoría"}
-          </button>
-        </form>
       </section>
       {/* Create Account Modal */}
       {showCreateModal && (
@@ -599,6 +559,93 @@ export default function SettingsClient() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Create Category Modal */}
+      {showCategoryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={(e) => { if (e.target === e.currentTarget) closeCategoryModal(); }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-base font-semibold text-gray-800">Nueva categoría</h3>
+              <button onClick={closeCategoryModal} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  autoFocus
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  placeholder="Ej: Gimnasio, Suscripciones..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-600 mb-2">Color</label>
+                {/* Preview */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="w-8 h-8 rounded-full border-2 border-gray-200 flex-shrink-0"
+                    style={{ backgroundColor: newCategoryColor }}
+                  />
+                  <span className="text-sm text-gray-600 truncate">{newCategoryName || "Vista previa"}</span>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {PRESET_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setNewCategoryColor(color)}
+                      className={`w-7 h-7 rounded-full border-2 transition-transform ${
+                        newCategoryColor === color ? "border-gray-800 scale-110" : "border-transparent hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-500">O elige:</span>
+                  <input
+                    type="color"
+                    value={newCategoryColor}
+                    onChange={(e) => setNewCategoryColor(e.target.value)}
+                    className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                  />
+                </div>
+              </div>
+
+              {categoryError && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{categoryError}</p>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={closeCategoryModal}
+                  className="flex-1 border border-gray-300 text-gray-600 text-sm font-medium py-2 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={savingCategory || !newCategoryName.trim()}
+                  onClick={handleCreateCategory}
+                  className="flex-1 bg-indigo-600 text-white text-sm font-medium py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingCategory ? "Creando..." : "Crear categoría"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
