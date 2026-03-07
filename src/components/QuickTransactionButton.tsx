@@ -299,21 +299,16 @@ export default function QuickTransactionButton() {
                     placeholder="Ej: 'Pagué 45.50 en el supermercado hoy con tarjeta'"
                     rows={3}
                     className={`${inputBase} border-gray-300 bg-white focus:border-indigo-500 focus:ring-indigo-200 resize-none flex-1 min-h-[80px] overflow-hidden`}
-                    disabled={isParsing || micState === "recording"}
+                    disabled={isParsing}
                     autoFocus
                   />
 
-                  {/* Mic button */}
-                  <div className="flex flex-col items-center gap-1 pt-1">
+                  {/* Mic button — temporalmente deshabilitado */}
+                  {/* <div className="flex flex-col items-center gap-1 pt-1">
                     <button
                       type="button"
                       onClick={micState === "recording" ? stopRecording : startRecording}
                       disabled={!speechSupported || isParsing}
-                      title={
-                        !speechSupported         ? "Solo disponible en Chrome/Edge"
-                        : micState === "recording" ? "Detener grabación"
-                        : "Iniciar grabación de voz"
-                      }
                       className={`relative p-2 rounded-full border transition-colors disabled:cursor-not-allowed
                         ${micState === "recording"
                           ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
@@ -329,15 +324,12 @@ export default function QuickTransactionButton() {
                         <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93V21h-3a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-1.07A9 9 0 0 0 21 11a1 1 0 0 0-2 0 7 7 0 0 1-14 0 1 1 0 0 0-2 0 9 9 0 0 0 8 8.93z" />
                       </svg>
                     </button>
-                    {speechSupported === false && (
-                      <span className="text-[9px] text-center text-gray-400 leading-tight max-w-[52px]">Solo Chrome</span>
-                    )}
-                  </div>
+                  </div> */}
                 </div>
 
                 <button
                   onClick={() => handleParse()}
-                  disabled={isParsing || !text.trim() || micState === "recording"}
+                  disabled={isParsing || !text.trim()}
                   className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   {isParsing ? (

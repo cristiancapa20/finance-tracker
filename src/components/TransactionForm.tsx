@@ -280,83 +280,32 @@ export default function TransactionForm() {
               placeholder="Describe tu transacción, ej: 'Pagué 45.50 en el supermercado hoy con tarjeta'"
               rows={3}
               className={`${inputBase} border-gray-300 bg-white focus:border-indigo-500 focus:ring-indigo-200 resize-none flex-1 min-h-[80px] overflow-hidden`}
-              disabled={isParsing || micState === "recording"}
+              disabled={isParsing}
             />
-            <div className="flex flex-col items-center gap-1 pt-1">
+            {/* Mic button — temporalmente deshabilitado */}
+            {/* <div className="flex flex-col items-center gap-1 pt-1">
               <button
                 type="button"
                 onClick={micState === "recording" ? stopRecording : startRecording}
                 disabled={!speechSupported || isParsing}
-                title={
-                  !speechSupported
-                    ? "Solo disponible en Chrome/Edge"
-                    : micState === "recording"
-                    ? "Detener grabación"
-                    : "Iniciar grabación de voz"
-                }
                 className={`relative p-2 rounded-full border transition-colors disabled:cursor-not-allowed
-                  ${
-                    micState === "recording"
-                      ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
-                      : isParsing
-                      ? "bg-gray-50 border-gray-200 text-gray-400"
-                      : speechSupported === false
-                      ? "bg-gray-50 border-gray-200 text-gray-300"
-                      : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                  ${micState === "recording"
+                    ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                    : speechSupported === false
+                    ? "bg-gray-50 border-gray-200 text-gray-300"
+                    : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                   }`}
               >
-                {isParsing ? (
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    />
-                  </svg>
-                ) : micState === "recording" ? (
-                  <>
-                    <span className="absolute inset-0 rounded-full bg-red-400 opacity-30 animate-ping" />
-                    <svg
-                      className="h-5 w-5 relative"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93V21h-3a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-1.07A9 9 0 0 0 21 11a1 1 0 0 0-2 0 7 7 0 0 1-14 0 1 1 0 0 0-2 0 9 9 0 0 0 8 8.93z" />
-                    </svg>
-                  </>
-                ) : (
-                  <svg
-                    className="h-5 w-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93V21h-3a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-1.07A9 9 0 0 0 21 11a1 1 0 0 0-2 0 7 7 0 0 1-14 0 1 1 0 0 0-2 0 9 9 0 0 0 8 8.93z" />
-                  </svg>
-                )}
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93V21h-3a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-1.07A9 9 0 0 0 21 11a1 1 0 0 0-2 0 7 7 0 0 1-14 0 1 1 0 0 0-2 0 9 9 0 0 0 8 8.93z" />
+                </svg>
               </button>
-              {speechSupported === false && (
-                <span className="text-[10px] text-center text-gray-400 leading-tight max-w-[60px]">
-                  Solo Chrome/Edge
-                </span>
-              )}
-            </div>
+            </div> */}
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => handleParse()}
-              disabled={isParsing || !text.trim() || micState === "recording"}
+              disabled={isParsing || !text.trim()}
               className="w-full sm:w-auto px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {isParsing ? (
