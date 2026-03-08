@@ -30,14 +30,18 @@ export default async function RootLayout({
         <body className={`${inter.className} bg-gray-50 min-h-screen`}>
           <Providers>
             {session && <Header />}
-            <div className={`${session ? "md:ml-64 pt-14 md:pt-0" : ""} flex flex-col min-h-screen`}>
-              <main className="flex-1">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                  {children}
-                </div>
-              </main>
-              <Footer />
-            </div>
+            {session ? (
+              <div className="md:ml-64 pt-14 md:pt-0 flex flex-col min-h-screen">
+                <main className="flex-1">
+                  <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    {children}
+                  </div>
+                </main>
+                <Footer />
+              </div>
+            ) : (
+              <main className="flex-1">{children}</main>
+            )}
             {session && <QuickTransactionButton />}
           </Providers>
         </body>
