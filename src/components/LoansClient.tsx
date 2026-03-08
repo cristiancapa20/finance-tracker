@@ -65,65 +65,6 @@ function ProgressBar({ total, remaining }: { total: number; remaining: number })
   );
 }
 
-/* ─── Alert Banner ─── */
-function AlertBanner({ loans }: { loans: Loan[] }) {
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("loansBannerDismissedAt");
-    if (stored) {
-      const dismissedAt = new Date(stored);
-      const hoursSince = (Date.now() - dismissedAt.getTime()) / (1000 * 60 * 60);
-      if (hoursSince < 24) setDismissed(true);
-    }
-  }, []);
-
-  const alertLoans = loans.filter(loan => {
-    if (loan.status !== "ACTIVE" || !loan.dueDate) return false;
-    const due = new Date(loan.dueDate);
-    const now = new Date();
-    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    // overdue always shows; otherwise show if within reminderDays
-    if (diffDays < 0) return true;
-    if (loan.reminderDays && diffDays <= loan.reminderDays) return true;
-    return false;
-  });
-
-  if (dismissed || alertLoans.length === 0) return null;
-
-  const hasOverdue = alertLoans.some(l => new Date(l.dueDate!) < new Date());
-
-  return (
-    <div className={`rounded-xl border p-4 flex gap-3 ${hasOverdue ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"}`}>
-      <AlertTriangle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasOverdue ? "text-red-500" : "text-amber-500"}`} />
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-semibold ${hasOverdue ? "text-red-800" : "text-amber-800"}`}>
-          {hasOverdue ? "Tienes pagos vencidos" : "Próximos vencimientos"}
-        </p>
-        <ul className="mt-1 space-y-0.5">
-          {alertLoans.map(loan => {
-            const due = new Date(loan.dueDate!);
-            const diffDays = Math.ceil((due.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-            const isOverdue = diffDays < 0;
-            return (
-              <li key={loan.id} className={`text-xs ${isOverdue ? "text-red-700" : "text-amber-700"}`}>
-                <span className="font-medium">{loan.contactName}</span>
-                {" · "}{fmt(loan.remaining)} restante
-                {" · "}{isOverdue ? `Venció hace ${Math.abs(diffDays)} día${Math.abs(diffDays) !== 1 ? "s" : ""}` : `Vence en ${diffDays} día${diffDays !== 1 ? "s" : ""}`}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <button
-        onClick={() => { localStorage.setItem("loansBannerDismissedAt", new Date().toISOString()); setDismissed(true); }}
-        className="p-1 text-gray-400 hover:text-gray-600 flex-shrink-0"
-      >
-        <X className="w-4 h-4" />
-      </button>
-    </div>
-  );
-}
 
 /* ─── New Loan Modal ─── */
 function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: (loan: Loan) => void }) {
@@ -395,6 +336,14 @@ function LoanCard({
   const due = dueDateStatus(loan.dueDate, loan.status);
   const isLent = loan.type === "LENT";
 
+  // Alerta inline: vencido o dentro del período de recordatorio
+  const alertDiffDays = loan.dueDate && loan.status === "ACTIVE"
+    ? Math.ceil((new Date(loan.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const isOverdueAlert = alertDiffDays !== null && alertDiffDays < 0;
+  const isUpcomingAlert = alertDiffDays !== null && alertDiffDays >= 0 && !!loan.reminderDays && alertDiffDays <= loan.reminderDays;
+  const showInlineAlert = isOverdueAlert || isUpcomingAlert;
+
   async function toggleStatus() {
     setToggling(true);
     try {
@@ -438,9 +387,36 @@ function LoanCard({
 
   return (
     <>
-      <div className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all ${loan.status === "PAID" ? "border-gray-200 opacity-75" : isLent ? "border-green-200" : "border-red-200"}`}>
+      <div className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all ${
+        loan.status === "PAID" ? "border-gray-200 opacity-75"
+        : isOverdueAlert ? "border-red-400"
+        : isUpcomingAlert ? "border-amber-300"
+        : isLent ? "border-green-200" : "border-red-200"
+      }`}>
         {/* Color strip */}
-        <div className={`h-1 w-full ${loan.status === "PAID" ? "bg-gray-300" : isLent ? "bg-green-400" : "bg-red-400"}`} />
+        <div className={`h-1 w-full ${
+          loan.status === "PAID" ? "bg-gray-300"
+          : isOverdueAlert ? "bg-red-500"
+          : isUpcomingAlert ? "bg-amber-400"
+          : isLent ? "bg-green-400" : "bg-red-400"
+        }`} />
+
+        {/* Inline alert */}
+        {showInlineAlert && (
+          <div className={`flex items-center gap-2 px-4 py-2 border-b ${
+            isOverdueAlert
+              ? "bg-red-50 border-red-100"
+              : "bg-amber-50 border-amber-100"
+          }`}>
+            <AlertTriangle className={`w-3.5 h-3.5 flex-shrink-0 ${isOverdueAlert ? "text-red-500" : "text-amber-500"}`} />
+            <p className={`text-xs font-medium ${isOverdueAlert ? "text-red-700" : "text-amber-700"}`}>
+              {isOverdueAlert
+                ? `Venció hace ${Math.abs(alertDiffDays!)} día${Math.abs(alertDiffDays!) !== 1 ? "s" : ""}`
+                : `Vence en ${alertDiffDays} día${alertDiffDays !== 1 ? "s" : ""}`
+              }
+            </p>
+          </div>
+        )}
 
         <div className="p-4 space-y-3">
           {/* Header row */}
@@ -609,9 +585,6 @@ export default function LoansClient() {
 
   return (
     <div className="space-y-6">
-      {/* Alert banner */}
-      <AlertBanner loans={loans} />
-
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-red-200 p-4 shadow-sm">
