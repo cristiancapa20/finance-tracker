@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Skeleton from "react-loading-skeleton";
 import { toast } from "@/lib/toast";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
@@ -525,9 +526,38 @@ export default function TransactionList() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 shadow-sm text-center">
-          <div className="text-gray-400 text-sm">Cargando transacciones...</div>
-        </div>
+        <>
+          {/* Desktop skeleton */}
+          <div className="hidden sm:block bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <Skeleton width={300} height={14} />
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-0">
+                <Skeleton width={80} height={14} />
+                <Skeleton width={160} height={14} />
+                <Skeleton width={90} height={24} borderRadius={12} />
+                <Skeleton width={80} height={14} />
+                <Skeleton width={60} height={22} borderRadius={4} />
+                <Skeleton width={70} height={14} className="ml-auto" />
+              </div>
+            ))}
+          </div>
+          {/* Mobile skeleton */}
+          <div className="sm:hidden space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex">
+                <div className="bg-gray-100 flex flex-col items-center justify-center px-3 py-3 min-w-[58px] border-r border-gray-200 flex-shrink-0">
+                  <Skeleton circle width={32} height={32} />
+                </div>
+                <div className="flex flex-col flex-1 p-3 gap-2">
+                  <Skeleton width="60%" height={14} />
+                  <Skeleton width="40%" height={12} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : transactions.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 shadow-sm text-center">
           <svg

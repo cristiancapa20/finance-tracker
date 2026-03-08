@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Skeleton from "react-loading-skeleton";
 import {
   PieChart,
   Pie,
@@ -256,9 +257,9 @@ export default function DashboardClient() {
       {loadingStats ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-lg shadow p-5 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-3" />
-              <div className="h-8 bg-gray-200 rounded w-3/4" />
+            <div key={i} className="bg-white rounded-lg shadow p-5">
+              <Skeleton width="50%" height={14} className="mb-3" />
+              <Skeleton width="75%" height={32} />
             </div>
           ))}
         </div>
@@ -297,8 +298,9 @@ export default function DashboardClient() {
             Gastos por categoría
           </h2>
           {loadingStats ? (
-            <div className="flex items-center justify-center h-48">
-              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="flex flex-col items-center justify-center h-48 gap-3">
+              <Skeleton circle width={160} height={160} />
+              <Skeleton width={200} height={14} />
             </div>
           ) : !hasMonthData || (monthStats?.expensesByCategory?.length ?? 0) === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-gray-400">
@@ -339,8 +341,8 @@ export default function DashboardClient() {
             Ingresos vs Gastos (últimos 6 meses)
           </h2>
           {loadingMonthly ? (
-            <div className="flex items-center justify-center h-48">
-              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="p-2">
+              <Skeleton height={250} borderRadius={8} />
             </div>
           ) : !hasMonthlyData ? (
             <div className="flex flex-col items-center justify-center h-48 text-gray-400">

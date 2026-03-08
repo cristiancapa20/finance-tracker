@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Skeleton from "react-loading-skeleton";
 import { Trash2, Wallet, Building2, CreditCard, CircleDollarSign, Pencil, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { getCategoryIcon } from "@/lib/categoryIcons";
@@ -243,7 +244,17 @@ export default function SettingsClient() {
 
         {/* Account list as cards */}
         {loadingAccounts ? (
-          <p className="text-sm text-gray-500 mb-4">Cargando...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="rounded-2xl overflow-hidden h-36 p-5 flex flex-col justify-between bg-gray-100">
+                <Skeleton width="40%" height={12} />
+                <div>
+                  <Skeleton width="60%" height={16} className="mb-1" />
+                  <Skeleton width="40%" height={12} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : accounts.length === 0 ? (
           <p className="text-sm text-gray-500 mb-4">No hay cuentas</p>
         ) : (
@@ -362,7 +373,14 @@ export default function SettingsClient() {
         {/* Category list */}
         <div className="bg-white rounded-lg border border-gray-200 mb-4">
           {loadingCategories ? (
-            <p className="text-sm text-gray-500 p-4">Cargando...</p>
+            <ul className="divide-y divide-gray-100">
+              {[1, 2, 3, 4].map((i) => (
+                <li key={i} className="flex items-center gap-3 px-4 py-3">
+                  <Skeleton circle width={28} height={28} />
+                  <Skeleton width={100} height={14} />
+                </li>
+              ))}
+            </ul>
           ) : categories.filter((c) => categoryTab === "system" ? c.isSystem : !c.isSystem).length === 0 ? (
             <p className="text-sm text-gray-500 p-4">
               {categoryTab === "custom" ? "Aún no has creado categorías propias" : "No hay categorías iniciales"}

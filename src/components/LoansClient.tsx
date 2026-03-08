@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Skeleton from "react-loading-skeleton";
 import { toast } from "@/lib/toast";
 import { Plus, X, Trash2, ChevronDown, ChevronUp, CheckCircle, RotateCcw, CreditCard, HandCoins, Bell, AlertTriangle } from "lucide-react";
 
@@ -649,8 +650,26 @@ export default function LoansClient() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="h-1 w-full bg-gray-100" />
+              <div className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <Skeleton width="50%" height={18} className="mb-1" />
+                    <Skeleton width="30%" height={12} />
+                  </div>
+                  <Skeleton width={80} height={28} />
+                </div>
+                <Skeleton height={8} borderRadius={4} />
+                <div className="flex gap-2">
+                  <Skeleton width={110} height={30} borderRadius={8} />
+                  <Skeleton width={110} height={30} borderRadius={8} />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : displayed.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
