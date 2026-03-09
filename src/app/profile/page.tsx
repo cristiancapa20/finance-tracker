@@ -3,9 +3,9 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Camera, User } from "lucide-react";
+import { Camera, User, LogOut } from "lucide-react";
 import Image from "next/image";
 import { toast } from "@/lib/toast";
 
@@ -163,6 +163,14 @@ export default function ProfilePage() {
           {saving ? "Guardando..." : "Guardar cambios"}
         </button>
       </form>
+
+      <button
+        onClick={() => signOut({ callbackUrl: "/login" })}
+        className="mt-4 w-full py-2.5 border border-red-200 text-red-500 font-medium rounded-lg text-sm hover:bg-red-50 transition flex items-center justify-center gap-2"
+      >
+        <LogOut className="w-4 h-4" />
+        Cerrar sesión
+      </button>
     </div>
   );
 }
