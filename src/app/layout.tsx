@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import QuickTransactionButton from "@/components/QuickTransactionButton";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import BottomNav from "@/components/BottomNav";
+import ContentWrapper from "@/components/ContentWrapper";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ViewTransitions } from "next-view-transitions";
@@ -44,18 +46,19 @@ export default async function RootLayout({
             <ServiceWorkerRegistrar />
             {session && <Header />}
             {session ? (
-              <div className="md:ml-64 pt-14 md:pt-0 flex flex-col min-h-screen">
+              <ContentWrapper>
                 <main className="flex-1">
                   <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     {children}
                   </div>
                 </main>
                 <Footer />
-              </div>
+              </ContentWrapper>
             ) : (
               <main className="flex-1">{children}</main>
             )}
             {session && <QuickTransactionButton />}
+            {session && <BottomNav />}
           </Providers>
         </body>
       </html>

@@ -9,6 +9,7 @@ import {
   PlusCircle, History, Wallet, X, Menu, TrendingUp, HelpCircle, HandCoins,
 } from "lucide-react";
 import Image from "next/image";
+import { useIsPWA } from "@/hooks/useIsPWA";
 
 function UserAvatar({ name, size = 8 }: { name?: string | null; size?: number }) {
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -123,6 +124,7 @@ export default function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const isPWA = useIsPWA();
 
   // Lock body scroll when mobile sidebar is open
   useEffect(() => {
@@ -135,48 +137,54 @@ export default function Header() {
 
   return (
     <>
-      {/* ── Desktop sidebar (fixed left) ── */}
+      {/* ── Desktop sidebar (fixed left) — siempre visible en md+ ── */}
       <aside className="hidden md:flex fixed top-0 left-0 h-full w-64 bg-gray-900 flex-col z-30 shadow-xl">
         <SidebarContent pathname={pathname} session={session} />
       </aside>
 
-      {/* ── Mobile top bar ── */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-30 bg-gray-900 border-b border-white/10 h-14 flex items-center px-4 gap-3">
-        <button
-          onClick={() => setMenuOpen(true)}
-          className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-          aria-label="Abrir menú"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        <Link href="/dashboard" className="flex items-center gap-2 text-base font-bold text-white">
-          <TrendingUp className="w-4 h-4 text-indigo-400" />
-          Finance Tracker
-        </Link>
-      </header>
+      {/* ── Mobile top bar — se oculta en modo PWA ── */}
+      {!isPWA && (
+        <header className="md:hidden fixed top-0 left-0 right-0 z-30 bg-gray-900 border-b border-white/10 h-14 flex items-center px-4 gap-3">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Abrir menú"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <Link href="/dashboard" className="flex items-center gap-2 text-base font-bold text-white">
+            <TrendingUp className="w-4 h-4 text-indigo-400" />
+            Finance Tracker
+          </Link>
+        </header>
+      )}
 
-      {/* ── Mobile overlay ── */}
-      <div
-        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
-          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        onClick={() => setMenuOpen(false)}
-      />
-
-      {/* ── Mobile sidebar panel ── */}
-      <aside
-        ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full w-64 z-50 md:hidden bg-gray-900 shadow-2xl
-          transition-transform duration-300 ease-in-out
-          ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <SidebarContent
-          pathname={pathname}
-          onClose={() => setMenuOpen(false)}
-          session={session}
+      {/* ── Mobile overlay — solo en modo web ── */}
+      {!isPWA && (
+        <div
+          className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
+            menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          onClick={() => setMenuOpen(false)}
         />
-      </aside>
+      )}
+
+      {/* ── Mobile sidebar panel — solo en modo web ── */}
+      {!isPWA && (
+        <aside
+          ref={sidebarRef}
+          className={`fixed top-0 left-0 h-full w-64 z-50 md:hidden bg-gray-900 shadow-2xl
+            transition-transform duration-300 ease-in-out
+            ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}
+        >
+          <SidebarContent
+            pathname={pathname}
+            onClose={() => setMenuOpen(false)}
+            session={session}
+          />
+        </aside>
+      )}
     </>
   );
 }
