@@ -7,6 +7,30 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* ── PWA standalone mode (solo móvil, max 767px) ────────── */
+/* El bottom nav está oculto por defecto; se muestra solo en PWA móvil */
+.pwa-bottom-nav {
+  display: none;
+}
+
+@media (display-mode: standalone) and (max-width: 767px) {
+  /* Mostrar bottom nav */
+  .pwa-bottom-nav {
+    display: flex;
+  }
+
+  /* Ocultar elementos del header móvil (hamburguesa, top bar, overlay) */
+  .pwa-hide-mobile {
+    display: none !important;
+  }
+
+  /* Ajustar padding del contenido: sin top (no hay header), con bottom (bottom nav) */
+  .content-pwa {
+    padding-top: 0 !important;
+    padding-bottom: 4rem !important;
+  }
+}
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }

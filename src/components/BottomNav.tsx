@@ -12,11 +12,11 @@ import {
 import { useIsPWA } from "@/hooks/useIsPWA";
 
 const tabs = [
-  { href: "/dashboard",    label: "Inicio",     icon: LayoutDashboard },
-  { href: "/historial",    label: "Historial",  icon: History },
-  { href: "/loans",        label: "Préstamos",  icon: HandCoins },
-  { href: "/cuentas",      label: "Cuentas",    icon: Wallet },
-  { href: "/profile",      label: "Perfil",     icon: User },
+  { href: "/dashboard", label: "Inicio",    icon: LayoutDashboard },
+  { href: "/historial", label: "Historial", icon: History },
+  { href: "/loans",     label: "Préstamos", icon: HandCoins },
+  { href: "/cuentas",   label: "Cuentas",   icon: Wallet },
+  { href: "/profile",   label: "Perfil",    icon: User },
 ];
 
 export default function BottomNav() {
@@ -27,24 +27,32 @@ export default function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-white/10 bottom-nav-safe">
-      <div className="flex items-center justify-around h-16">
+      {/* sin justify-around: flex-1 en cada tab reparte el ancho exactamente en 5 partes iguales */}
+      <div className="flex h-16 w-full">
         {tabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors active:scale-95 ${
+              className={`relative flex flex-col items-center justify-center flex-1 min-w-0 gap-[3px] transition-all duration-150 active:opacity-60 ${
                 active ? "text-indigo-400" : "text-gray-500"
               }`}
             >
-              <Icon className={`w-5 h-5 ${active ? "stroke-[2.5px]" : ""}`} />
-              <span className={`text-[10px] font-medium ${active ? "text-indigo-400" : "text-gray-500"}`}>
+              {/* Indicador activo: línea en la parte superior */}
+              {active && (
+                <span className="absolute top-0 inset-x-0 h-[2px] rounded-full bg-indigo-400" />
+              )}
+
+              <Icon
+                className="w-[22px] h-[22px] shrink-0"
+                strokeWidth={active ? 2.5 : 1.8}
+              />
+
+              {/* w-full + text-center + truncate evita que el texto se desborde entre tabs */}
+              <span className="w-full text-center text-[10px] font-medium leading-none truncate px-1">
                 {label}
               </span>
-              {active && (
-                <span className="absolute bottom-0 w-1 h-1 rounded-full bg-indigo-400" />
-              )}
             </Link>
           );
         })}

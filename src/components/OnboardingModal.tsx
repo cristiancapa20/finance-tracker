@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { TrendingUp } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -19,6 +20,7 @@ const CARD_COLORS = [
 ];
 
 export default function OnboardingModal() {
+  const { status } = useSession();
   const [show, setShow] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -29,7 +31,12 @@ export default function OnboardingModal() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Esperar que la sesión esté lista antes de consultar las cuentas.
+  // IMPORTANTE: `status` debe estar en el array de dependencias para que el efecto
+  // se re-ejecute cuando la sesión pase de "loading" a "authenticated".
   useEffect(() => {
+    if (status !== "authenticated") return;
+
     fetch("/api/accounts")
       .then((r) => r.json())
       .then((data) => {
@@ -38,7 +45,7 @@ export default function OnboardingModal() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [status]);
 
   async function handleCreate() {
     setError("");
