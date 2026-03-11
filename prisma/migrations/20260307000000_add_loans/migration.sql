@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "Loan" (
+CREATE TABLE IF NOT EXISTS "Loan" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "type" TEXT NOT NULL,
     "contactName" TEXT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE "Loan" (
 );
 
 -- CreateTable
-CREATE TABLE "LoanPayment" (
+CREATE TABLE IF NOT EXISTS "LoanPayment" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "loanId" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
