@@ -513,11 +513,6 @@ function LoanCard({
 
           {/* Due date + createdAt */}
           <div className="flex items-center gap-2 flex-wrap text-xs">
-            {loan.account && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full border font-medium bg-indigo-50 text-indigo-700 border-indigo-200">
-                Cuenta inicial: {loan.account.name}
-              </span>
-            )}
             {due && (
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full border font-medium ${due.cls}`}>
                 {due.label}
