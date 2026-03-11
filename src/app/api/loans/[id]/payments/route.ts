@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import { amountInputToCents, centsToAmount } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,19 +32,19 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const payment = await db.loanPayment.create({
       data: {
         loanId: params.id,
-        amount: Math.round(amountNum * 100),
+        amount: amountInputToCents(amountNum),
         date: new Date(date),
         note: note?.trim() || null,
       },
     });
 
     // Auto-mark as PAID if fully covered
-    const totalPaid = loan.payments.reduce((s: number, p: { amount: number }) => s + p.amount, 0) + Math.round(amountNum * 100);
+    const totalPaid = loan.payments.reduce((s: number, p: { amount: number }) => s + p.amount, 0) + amountInputToCents(amountNum);
     if (totalPaid >= loan.amount) {
       await db.loan.update({ where: { id: params.id }, data: { status: "PAID", updatedAt: new Date() } });
     }
 
-    return NextResponse.json({ data: { ...payment, amount: payment.amount / 100 } }, { status: 201 });
+    return NextResponse.json({ data: { ...payment, amount: centsToAmount(payment.amount) } }, { status: 201 });
   } catch (error) {
     console.error("POST /api/loans/[id]/payments error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
