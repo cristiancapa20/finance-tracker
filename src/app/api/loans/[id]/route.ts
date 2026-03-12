@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
-import { deleteBalanceTransaction } from "@/lib/loanBalance";
 import { amountInputToCents, centsToAmount } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
@@ -61,23 +60,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
 
     const loan = await db.loan.findFirst({
       where: { id: params.id, userId: session.user.id },
-      include: {
-        payments: {
-          select: { balanceTransactionId: true },
-        },
-      },
     });
     if (!loan) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await db.$transaction(async (tx: any) => {
-      await tx.loan.delete({ where: { id: params.id } });
-      await deleteBalanceTransaction(loan.balanceTransactionId, session.user.id, tx);
-      await Promise.all(
-        loan.payments.map((payment: { balanceTransactionId: string | null }) =>
-          deleteBalanceTransaction(payment.balanceTransactionId, session.user.id, tx)
-        )
-      );
-    });
+    await db.loan.delete({ where: { id: params.id } });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("DELETE /api/loans/[id] error:", error);

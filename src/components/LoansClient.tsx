@@ -75,7 +75,7 @@ function ProgressBar({ total, remaining }: { total: number; remaining: number })
 
 /* ─── New Loan Modal ─── */
 function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: (loan: Loan) => void }) {
-  const [form, setForm] = useState({ type: "OWED", contactName: "", amount: "", dueDate: "", description: "", reminderDays: "", accountId: "" });
+  const [form, setForm] = useState({ type: "LENT", contactName: "", amount: "", dueDate: "", description: "", reminderDays: "", accountId: "" });
   const [accounts, setAccounts] = useState<LoanAccount[]>([]);
   const [accountsLoaded, setAccountsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -111,7 +111,7 @@ function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       });
       const data = await res.json();
       if (!res.ok) { toast.error({ title: "Error", description: data.error }); return; }
-      toast.success({ title: "Registrado correctamente" });
+      toast.success({ title: form.type === "LENT" ? "Préstamo registrado" : "Deuda registrada" });
       onCreated(data.data);
       onClose();
     } catch { toast.error({ title: "Error de red" }); }
@@ -119,6 +119,7 @@ function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   }
 
   const inputCls = "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 transition-colors";
+  const isLent = form.type === "LENT";
 
   return (
     <div
@@ -128,48 +129,76 @@ function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     >
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm" style={{ maxHeight: "90vh", overflowY: "auto" }}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-gray-900">Nuevo registro</h2>
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Nuevo registro</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Préstamo o deuda</p>
+          </div>
           <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Type */}
+
+          {/* Type selector */}
           <div className="grid grid-cols-2 gap-2">
-            {([["OWED", "Debo dinero", "bg-red-50 border-red-300 text-red-700"], ["LENT", "Me deben dinero", "bg-green-50 border-green-300 text-green-700"]] as const).map(([val, label, cls]) => (
-              <button
-                key={val}
-                type="button"
-                onClick={() => setForm(f => ({
-                  ...f,
-                  type: val,
-                  dueDate: val === "OWED" && f.dueDate && f.dueDate < today() ? "" : f.dueDate,
-                }))}
-                className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${form.type === val ? cls : "bg-white border-gray-200 text-gray-500 hover:border-gray-300"}`}
-              >
-                {label}
-              </button>
-            ))}
+            <button
+              type="button"
+              onClick={() => setForm(f => ({ ...f, type: "LENT" }))}
+              className={`flex flex-col items-start px-3 py-3 rounded-xl border-2 text-left transition-all ${
+                form.type === "LENT"
+                  ? "border-green-400 bg-green-50"
+                  : "border-gray-200 bg-white hover:border-gray-300"
+              }`}
+            >
+              <span className={`text-sm font-semibold ${form.type === "LENT" ? "text-green-700" : "text-gray-600"}`}>
+                🤝 Préstamo
+              </span>
+              <span className={`text-xs mt-0.5 ${form.type === "LENT" ? "text-green-600" : "text-gray-400"}`}>
+                Presté dinero a alguien
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm(f => ({
+                ...f,
+                type: "OWED",
+                dueDate: f.dueDate && f.dueDate < today() ? "" : f.dueDate,
+              }))}
+              className={`flex flex-col items-start px-3 py-3 rounded-xl border-2 text-left transition-all ${
+                form.type === "OWED"
+                  ? "border-red-400 bg-red-50"
+                  : "border-gray-200 bg-white hover:border-gray-300"
+              }`}
+            >
+              <span className={`text-sm font-semibold ${form.type === "OWED" ? "text-red-700" : "text-gray-600"}`}>
+                💸 Deuda
+              </span>
+              <span className={`text-xs mt-0.5 ${form.type === "OWED" ? "text-red-600" : "text-gray-400"}`}>
+                Debo dinero a alguien
+              </span>
+            </button>
           </div>
 
           {/* Contact */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
-              {form.type === "OWED" ? "¿A quién le debo?" : "¿Quién me debe?"}
+              {isLent ? "¿A quién le prestaste?" : "¿A quién le debes?"}
             </label>
             <input
               type="text"
               value={form.contactName}
               onChange={e => setForm(f => ({ ...f, contactName: e.target.value }))}
               className={inputCls}
-              placeholder="Nombre de la persona o entidad"
+              placeholder={isLent ? "Nombre de quien recibió el préstamo" : "Nombre de quien te prestó"}
               required
             />
           </div>
 
           {/* Amount */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Monto total</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              {isLent ? "Monto prestado" : "Monto de la deuda"}
+            </label>
             <input
               type="number"
               min="1"
@@ -182,9 +211,10 @@ function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
             />
           </div>
 
+          {/* Account */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
-              {form.type === "OWED" ? "Cuenta donde recibiste el dinero" : "Cuenta desde la que prestaste"}
+              {isLent ? "Cuenta desde la que prestaste" : "Cuenta donde recibiste el dinero"}
             </label>
             <select
               value={form.accountId}
@@ -205,16 +235,18 @@ function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
           {/* Due date */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Fecha de vencimiento <span className="text-gray-400">(opcional)</span></label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Fecha de vencimiento <span className="text-gray-400">(opcional)</span>
+            </label>
             <input
               type="date"
               value={form.dueDate}
-              min={form.type === "OWED" ? today() : undefined}
+              min={!isLent ? today() : undefined}
               onChange={e => setForm(f => ({ ...f, dueDate: e.target.value, reminderDays: "" }))}
               className={inputCls}
             />
-            {form.type === "OWED" && (
-              <p className="text-xs text-gray-400 mt-1">Las deudas deben vencer a partir de hoy.</p>
+            {!isLent && (
+              <p className="text-xs text-gray-400 mt-1">Fecha límite para pagar la deuda.</p>
             )}
           </div>
 
@@ -270,9 +302,11 @@ function NewLoanModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
             <button
               type="submit"
               disabled={loading || !form.contactName.trim() || !form.amount || !form.accountId || accounts.length === 0}
-              className="flex-1 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className={`flex-1 py-2.5 text-white text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                isLent ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
+              }`}
             >
-              {loading ? "Guardando..." : "Guardar"}
+              {loading ? "Guardando..." : isLent ? "Registrar préstamo" : "Registrar deuda"}
             </button>
             <button type="button" onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               Cancelar
@@ -628,7 +662,7 @@ function LoanCard({
 export default function LoansClient() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"OWED" | "LENT">("OWED");
+  const [tab, setTab] = useState<"OWED" | "LENT">("LENT");
   const [showNewModal, setShowNewModal] = useState(false);
 
   useEffect(() => {
@@ -674,28 +708,30 @@ export default function LoansClient() {
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-red-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <CreditCard className="w-4 h-4 text-red-500" />
-            <p className="text-xs font-medium text-gray-600">Total que debo</p>
-          </div>
-          <p className="text-xl font-bold text-red-600">{fmt(totalOwed)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{owned.filter(l => l.status === "ACTIVE").length} activa{owned.filter(l => l.status === "ACTIVE").length !== 1 ? "s" : ""}</p>
-        </div>
         <div className="bg-white rounded-xl border border-green-200 p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-1">
             <HandCoins className="w-4 h-4 text-green-600" />
-            <p className="text-xs font-medium text-gray-600">Total que me deben</p>
+            <p className="text-xs font-semibold text-green-700">Préstamos</p>
           </div>
           <p className="text-xl font-bold text-green-600">{fmt(totalLent)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{lent.filter(l => l.status === "ACTIVE").length} activa{lent.filter(l => l.status === "ACTIVE").length !== 1 ? "s" : ""}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Dinero que presté</p>
+          <p className="text-xs text-gray-400 mt-0.5">{lent.filter(l => l.status === "ACTIVE").length} activo{lent.filter(l => l.status === "ACTIVE").length !== 1 ? "s" : ""}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-red-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <CreditCard className="w-4 h-4 text-red-500" />
+            <p className="text-xs font-semibold text-red-700">Deudas</p>
+          </div>
+          <p className="text-xl font-bold text-red-600">{fmt(totalOwed)}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Dinero que debo</p>
+          <p className="text-xs text-gray-400 mt-0.5">{owned.filter(l => l.status === "ACTIVE").length} activa{owned.filter(l => l.status === "ACTIVE").length !== 1 ? "s" : ""}</p>
         </div>
       </div>
 
       {/* Tabs + New button */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
-          {([["OWED", "Mis deudas", owned.length], ["LENT", "Me deben", lent.length]] as const).map(([val, label, count]) => (
+          {([["LENT", "Préstamos", lent.length], ["OWED", "Deudas", owned.length]] as const).map(([val, label, count]) => (
             <button
               key={val}
               onClick={() => setTab(val)}
@@ -749,7 +785,10 @@ export default function LoansClient() {
             {tab === "OWED" ? <CreditCard className="w-7 h-7 text-red-400" /> : <HandCoins className="w-7 h-7 text-green-400" />}
           </div>
           <p className="text-gray-500 font-medium">
-            {tab === "OWED" ? "No tienes deudas registradas" : "No tienes préstamos dados registrados"}
+            {tab === "LENT" ? "No tienes préstamos registrados" : "No tienes deudas registradas"}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            {tab === "LENT" ? "Aquí aparece el dinero que prestaste a otros" : "Aquí aparece el dinero que debes pagar"}
           </p>
           <button onClick={() => setShowNewModal(true)} className="mt-3 text-sm text-indigo-600 hover:text-indigo-800 font-medium underline">
             Agregar uno

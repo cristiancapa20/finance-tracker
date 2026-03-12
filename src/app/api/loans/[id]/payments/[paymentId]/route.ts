@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
-import { deleteBalanceTransaction } from "@/lib/loanBalance";
 import { prisma } from "@/lib/prisma";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,16 +21,12 @@ export async function DELETE(
 
     const payment = await db.loanPayment.findFirst({
       where: { id: params.paymentId, loanId: params.id },
-      select: { balanceTransactionId: true },
     });
     if (!payment) return NextResponse.json({ error: "Pago no encontrado" }, { status: 404 });
 
-    await db.$transaction(async (tx: typeof prisma) => {
-      await tx.loanPayment.delete({ where: { id: params.paymentId } });
-      await deleteBalanceTransaction(payment.balanceTransactionId, session.user.id, tx);
-    });
+    await db.loanPayment.delete({ where: { id: params.paymentId } });
 
-    // Re-check if loan should go back to ACTIVE
+    // Re-check si el préstamo debe volver a ACTIVE
     const agg = await db.loanPayment.aggregate({
       where: { loanId: params.id },
       _sum: { amount: true },

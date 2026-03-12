@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
-const SYSTEM_CATEGORY_FALLBACK = "Otros";
+const CATEGORY_PRESTAMO = "Préstamo";
+const CATEGORY_DEUDA = "Deuda";
+const CATEGORY_FALLBACK = "Otros";
 
 type LoanType = "LENT" | "OWED";
 type DbClient = typeof prisma;
@@ -13,37 +15,42 @@ function getBalanceTypeForPayment(type: LoanType) {
   return type === "OWED" ? "EXPENSE" : "INCOME";
 }
 
-async function getBalanceCategoryId(userId: string, db: DbClient) {
-  const category = await db.category.findFirst({
-    where: {
-      OR: [
-        { userId, name: SYSTEM_CATEGORY_FALLBACK },
-        { isSystem: true, name: SYSTEM_CATEGORY_FALLBACK },
-        { userId },
-        { isSystem: true },
-      ],
-    },
-    orderBy: [{ isSystem: "desc" }, { name: "asc" }],
+async function getBalanceCategoryId(type: LoanType, db: DbClient) {
+  const categoryName = type === "LENT" ? CATEGORY_PRESTAMO : CATEGORY_DEUDA;
+
+  // Busca primero la categoría específica del tipo de préstamo
+  const specific = await db.category.findFirst({
+    where: { isSystem: true, name: categoryName },
     select: { id: true },
   });
+  if (specific) return specific.id;
 
-  if (!category) {
-    throw new Error("No category available for loan balance tracking");
-  }
+  // Si no existe, usa "Otros" como fallback
+  const fallback = await db.category.findFirst({
+    where: { isSystem: true, name: CATEGORY_FALLBACK },
+    select: { id: true },
+  });
+  if (fallback) return fallback.id;
 
-  return category.id;
+  // Último recurso: cualquier categoría del sistema
+  const any = await db.category.findFirst({
+    where: { isSystem: true },
+    select: { id: true },
+  });
+  if (!any) throw new Error("No category available for loan balance tracking");
+  return any.id;
 }
 
 function buildLoanDescription(type: LoanType, contactName: string) {
   return type === "OWED"
-    ? `Ingreso por deuda con ${contactName}`
-    : `Prestamo entregado a ${contactName}`;
+    ? `Dinero recibido de ${contactName} (deuda)`
+    : `Dinero prestado a ${contactName}`;
 }
 
 function buildPaymentDescription(type: LoanType, contactName: string) {
   return type === "OWED"
     ? `Pago de deuda a ${contactName}`
-    : `Cobro de prestamo a ${contactName}`;
+    : `Cobro de préstamo a ${contactName}`;
 }
 
 export async function createLoanBalanceTransaction(input: {
@@ -56,7 +63,7 @@ export async function createLoanBalanceTransaction(input: {
   db?: DbClient;
 }) {
   const db = input.db ?? prisma;
-  const categoryId = await getBalanceCategoryId(input.userId, db);
+  const categoryId = await getBalanceCategoryId(input.type, db);
 
   return db.transaction.create({
     data: {
@@ -82,7 +89,7 @@ export async function createLoanPaymentBalanceTransaction(input: {
   db?: DbClient;
 }) {
   const db = input.db ?? prisma;
-  const categoryId = await getBalanceCategoryId(input.userId, db);
+  const categoryId = await getBalanceCategoryId(input.type, db);
 
   return db.transaction.create({
     data: {

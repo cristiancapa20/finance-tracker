@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
-import { createLoanPaymentBalanceTransaction } from "@/lib/loanBalance";
 import { amountInputToCents, centsToAmount } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
@@ -39,27 +38,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const amountInCents = amountInputToCents(amountNum);
     const paymentDate = new Date(date);
-    const payment = await db.$transaction(async (tx: typeof db) => {
-      const transaction = await createLoanPaymentBalanceTransaction({
-        userId: session.user.id,
-        accountId,
-        type: loan.type,
-        contactName: loan.contactName,
-        amountInCents,
-        date: paymentDate,
-        db: tx,
-      });
 
-      return tx.loanPayment.create({
-        data: {
-          loanId: params.id,
-          accountId,
-          balanceTransactionId: transaction.id,
-          amount: amountInCents,
-          date: paymentDate,
-          note: note?.trim() || null,
-        },
-      });
+    const payment = await db.loanPayment.create({
+      data: {
+        loanId: params.id,
+        accountId,
+        amount: amountInCents,
+        date: paymentDate,
+        note: note?.trim() || null,
+      },
     });
 
     // Auto-mark as PAID if fully covered

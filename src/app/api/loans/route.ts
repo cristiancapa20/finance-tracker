@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
-import { createLoanBalanceTransaction } from "@/lib/loanBalance";
 import { amountInputToCents, centsToAmount } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
@@ -81,41 +80,29 @@ export async function POST(req: NextRequest) {
     }
 
     const amountInCents = amountInputToCents(amountNum);
-    const loan = await db.$transaction(async (tx: any) => {
-      const transaction = await createLoanBalanceTransaction({
-        userId: session.user.id,
-        accountId,
+    const loan = await db.loan.create({
+      data: {
         type,
         contactName: contactName.trim(),
-        amountInCents,
-        db: tx,
-      });
-
-      return tx.loan.create({
-        data: {
-          type,
-          contactName: contactName.trim(),
-          amount: amountInCents,
-          description: description?.trim() || null,
-          dueDate: dueDate ? new Date(dueDate) : null,
-          reminderDays: reminderDays ? parseInt(reminderDays) : null,
-          status: "ACTIVE",
-          accountId,
-          balanceTransactionId: transaction.id,
-          userId: session.user.id,
-        },
-        select: {
-          id: true,
-          type: true,
-          contactName: true,
-          amount: true,
-          description: true,
-          dueDate: true,
-          status: true,
-          reminderDays: true,
-          createdAt: true,
-        },
-      });
+        amount: amountInCents,
+        description: description?.trim() || null,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        reminderDays: reminderDays ? parseInt(reminderDays) : null,
+        status: "ACTIVE",
+        accountId,
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+        type: true,
+        contactName: true,
+        amount: true,
+        description: true,
+        dueDate: true,
+        status: true,
+        reminderDays: true,
+        createdAt: true,
+      },
     });
 
     return NextResponse.json({

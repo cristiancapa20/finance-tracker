@@ -13,6 +13,8 @@ const categories = [
   { id: 'cat-tecnologia', name: 'Tecnología', color: '#6C5CE7', icon: '💻', isSystem: true },
   { id: 'cat-servicios', name: 'Servicios', color: '#A29BFE', icon: '⚡', isSystem: true },
   { id: 'cat-otros', name: 'Otros', color: '#B2BEC3', icon: '📦', isSystem: true },
+  { id: 'cat-prestamo', name: 'Préstamo', color: '#00B894', icon: '🤝', isSystem: true },
+  { id: 'cat-deuda', name: 'Deuda', color: '#E17055', icon: '💸', isSystem: true },
 ]
 
 async function main() {
