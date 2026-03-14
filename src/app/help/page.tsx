@@ -9,6 +9,7 @@ import {
   Settings,
   ChevronRight,
   CheckCircle2,
+  ArrowLeft,
 } from "lucide-react";
 
 interface Step {
@@ -137,6 +138,17 @@ const colorMap: Record<string, { bg: string; icon: string; badge: string; border
 export default function HelpPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
+
+      {/* Back button */}
+      <div>
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver al login
+        </Link>
+      </div>
 
       {/* Header */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 text-center">
